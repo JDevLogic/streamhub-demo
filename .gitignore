@@ -1,0 +1,43 @@
+# Secrets
+.env
+*.env
+backend/.env
+certbot/conf/accounts/
+certbot/conf/archive/
+certbot/conf/live/
+certbot/conf/renewal/
+certbot/conf/renewal-hooks/
+certbot/conf/keys/
+certbot/www/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.db
+*.sqlite
+*.sqlite3
+
+# Persistent caches
+backend/.cache/
+
+# Flutter
+frontend_flutter/build/
+frontend_flutter/.dart_tool/
+frontend_flutter/.flutter-plugins
+frontend_flutter/.flutter-plugins-dependencies
+frontend_flutter/.packages
+frontend_flutter/**/ephemeral/
+frontend_flutter/android/.gradle/
+frontend_flutter/android/local.properties
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Local agent/editor settings
+.claude/settings.local.json
+skills-lock.json
