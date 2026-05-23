@@ -1,208 +1,179 @@
-﻿# AniStream Demo
+# AniStream Demo
 
-> Proyecto educativo full-stack orientado a portfolio, centrado en arquitectura backend, desarrollo móvil, caché, autenticación, telemetría y despliegue con Docker.
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat&logo=fastapi&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
-AniStream Demo es la versión pública y segura de un proyecto personal de aprendizaje full-stack.
+> Demo educativa full-stack orientada a portfolio: arquitectura backend, desarrollo móvil, caché, autenticación, telemetría y despliegue con Docker.
 
-Esta versión utiliza datos de demostración y un vídeo público de prueba para enseñar la arquitectura del sistema sin enlazar, alojar, distribuir ni monetizar contenido protegido por derechos de autor.
+AniStream Demo es la versión pública de un proyecto personal de aprendizaje full-stack. Utiliza datos de demostración y un vídeo público de prueba para mostrar la arquitectura del sistema sin enlazar, alojar, distribuir ni monetizar contenido protegido por derechos de autor.
 
-El objetivo principal de este repositorio es demostrar conocimientos técnicos reales: diseño de APIs REST con FastAPI, caché con Redis y SQLite, autenticación, sincronización de usuario, telemetría, rate limiting, Docker, Nginx y desarrollo móvil con Flutter.
-
----
-
-## Modo demo
-
-La versión pública funciona con:
-
-DATA_PROVIDER=mock
-
-Todos los datos devueltos por la API son datos de demostración.
-
-El endpoint de resolución devuelve un vídeo público de prueba usado únicamente para validar:
-
-- reproducción nativa;
-- progreso de reproducción;
-- continuar viendo;
-- sincronización de usuario;
-- telemetría;
-- dashboard de monitoreo;
-- integración entre app móvil y backend.
+El objetivo es demostrar cómo se diseña e integra un sistema completo: API REST con FastAPI, caché en dos capas (Redis + memoria), autenticación con sesiones, sincronización de estado de usuario, telemetría, rate limiting, despliegue con Docker y un cliente móvil con Flutter.
 
 ---
 
-## Características principales
+## Highlights técnicos
 
-- Backend con FastAPI.
-- Cliente móvil Android desarrollado con Flutter.
-- Arquitectura basada en proveedores de datos.
-- Proveedor mock para demo pública.
-- Caché con Redis.
-- Persistencia con SQLite.
-- Autenticación y sesiones de usuario.
-- Sincronización de estado del usuario.
-- Historial de visualización.
-- Sección de continuar viendo.
-- Reproductor nativo con vídeo demo.
-- Dashboard protegido con Basic Auth.
-- Telemetría y monitoreo de fuentes demo.
-- Rate limiting.
-- Configuración mediante variables de entorno.
-- Despliegue con Docker Compose.
-- Configuración de Nginx como reverse proxy.
+- **Arquitectura basada en proveedores** — capa de abstracción entre rutas y fuente de datos; el proveedor mock permite ejecutar el sistema completo sin dependencias externas.
+- **Caché en dos capas** — Redis para datos compartidos entre workers + `TTLCache` en memoria para reducir round-trips.
+- **Rate limiting con SQLite** — sliding-window implementado sobre SQLite, sin dependencias de Redis para esta función crítica.
+- **Sincronización de usuario** — el estado de la app (lista, progreso, historial) se serializa y sincroniza entre dispositivos a través de la API.
+- **Dashboard de telemetría propio** — panel protegido con Basic Auth que registra actividad, métricas de latencia, health de fuentes y logs en tiempo real.
+- **Reproductor nativo en Flutter** — integración con `media_kit`, progreso persistido localmente con SQLite/Drift y continuación automática.
+- **Autenticación completa** — registro, login, sesiones con tokens, expiración y logout desde el cliente.
+- **Despliegue listo** — Docker Compose con backend, Redis y Nginx; configuración de Certbot para HTTPS incluida.
 
 ---
 
-## Arquitectura
-
-Estructura general del proyecto:
-
-anistream-demo/
-├── backend/              API FastAPI, auth, caché, dashboard y telemetría
-│   ├── providers/        Proveedores de datos
-│   ├── mock/             Datos de demostración
-│   ├── routes/           Rutas de la API
-│   ├── db/               SQLite, Redis, métricas y telemetría
-│   └── dashboard/        Panel de monitoreo
-├── frontend_flutter/     Cliente móvil Flutter
-├── nginx/                Configuración de reverse proxy
-├── deploy/               Archivos de despliegue
-└── docker-compose.yml    Backend, Redis y Nginx
-
----
-
-## Stack backend
+## Stack
 
 | Capa | Tecnología |
 |---|---|
 | API | FastAPI + Uvicorn |
-| Caché | Redis + caché en memoria |
+| Caché | Redis + TTLCache en memoria |
 | Persistencia | SQLite |
-| Autenticación | API Key + sesiones |
+| Autenticación | API Key + sesiones Bearer |
+| Rate limiting | SQLite sliding-window |
 | Tareas programadas | APScheduler |
 | Monitoreo | Dashboard propio + telemetría |
-| Despliegue | Docker Compose + Nginx |
+| Despliegue | Docker Compose + Nginx + Certbot |
+| App móvil | Flutter (Riverpod, media_kit, Drift) |
 
 ---
 
-## Stack frontend
+## Estructura del proyecto
 
-| Capa | Tecnología |
-|---|---|
-| Framework | Flutter |
-| Estado | Riverpod |
-| Persistencia local | SQLite / Drift |
-| Reproductor | media_kit |
-| Preferencias | SharedPreferences |
+```
+anistream-demo/
+├── backend/
+│   ├── providers/        # Capa de abstracción de datos
+│   ├── routes/           # Endpoints de la API
+│   ├── db/               # SQLite, Redis, métricas y telemetría
+│   ├── dashboard/        # Panel de monitoreo
+│   └── utils/            # Logs, actividad y helpers
+├── frontend_flutter/     # Cliente móvil Android
+├── nginx/                # Configuración reverse proxy + HTTPS
+├── deploy/               # Systemd service y scripts de despliegue
+└── docker-compose.yml
+```
 
 ---
 
 ## Endpoints principales
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | /health | Estado del backend |
-| GET | /metrics | Métricas del sistema |
-| GET | /dashboard | Dashboard protegido |
-| GET | /animes | Catálogo demo |
-| GET | /ultimos-episodios | Episodios demo recientes |
-| GET | /en-emision | Lista demo en emisión |
-| GET | /buscar?q= | Búsqueda demo |
-| GET | /anime-detalle?url= | Detalle demo |
-| GET | /episodios?url= | Lista demo de episodios |
-| GET | /servidores?url= | Lista demo de servidores |
-| GET | /resolver?url= | Resolución de vídeo demo |
-| POST | /auth/register | Registro de usuario |
-| POST | /auth/login | Inicio de sesión |
-| GET | /auth/me | Usuario actual |
-| GET | /user/state | Descargar estado sincronizado |
-| POST | /user/state | Subir estado sincronizado |
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| `GET` | `/health` | — | Estado del backend |
+| `GET` | `/metrics` | — | Métricas de latencia |
+| `GET` | `/dashboard` | Basic Auth | Panel de monitoreo |
+| `GET` | `/animes` | API Key | Catálogo demo |
+| `GET` | `/ultimos-episodios` | API Key | Episodios recientes |
+| `GET` | `/en-emision` | API Key | En emisión |
+| `GET` | `/buscar?q=` | API Key | Búsqueda |
+| `GET` | `/anime-detalle?url=` | API Key | Detalle de anime |
+| `GET` | `/episodios?url=` | API Key | Lista de episodios |
+| `GET` | `/servidores?url=` | API Key | Servidores de vídeo |
+| `GET` | `/resolver?url=` | API Key | URL de reproducción |
+| `POST` | `/auth/register` | API Key | Registro de usuario |
+| `POST` | `/auth/login` | API Key | Inicio de sesión |
+| `GET` | `/auth/me` | Bearer | Usuario actual |
+| `GET` | `/user/state` | Bearer | Descargar estado |
+| `POST` | `/user/state` | Bearer | Subir estado |
+
+---
+
+## Modo demo
+
+La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos devueltos por la API son ficticios. El endpoint `/resolver` apunta a un vídeo público de Google usado únicamente para validar el flujo completo:
+
+- reproducción nativa en el player
+- progreso y "continuar viendo"
+- sincronización de estado entre dispositivos
+- telemetría y dashboard de monitoreo
+
+---
+
+## Inicio rápido
+
+### Con Docker Compose
+
+```bash
+cp backend/.env.example backend/.env
+# Edita backend/.env con tus valores
+
+docker compose up -d
+
+# Verificar que arranca
+curl http://localhost:5050/health
+```
+
+### Backend en local
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# Edita .env con tus valores
+
+python app.py
+```
+
+Backend disponible en `http://localhost:5050`.
+
+### App Flutter
+
+```bash
+cd frontend_flutter
+flutter pub get
+
+# Emulador Android
+flutter run \
+  --dart-define=API_BASE_URL=http://10.0.2.2:5050 \
+  --dart-define=API_KEY=tu_api_key
+
+# Dispositivo físico (misma red local)
+flutter run \
+  --dart-define=API_BASE_URL=http://192.168.1.X:5050 \
+  --dart-define=API_KEY=tu_api_key
+```
 
 ---
 
 ## Variables de entorno
 
-Copia el archivo de ejemplo:
-
+```bash
 cp backend/.env.example backend/.env
+```
 
-Variables esperadas:
-
-API_KEY=replace_with_long_random_value
-DASHBOARD_USER=replace_with_non_default_user
-DASHBOARD_PASS=replace_with_long_random_password
+```env
+API_KEY=reemplaza_con_valor_aleatorio_largo
+DASHBOARD_USER=reemplaza_con_usuario
+DASHBOARD_PASS=reemplaza_con_contraseña_larga
 ALLOWED_ORIGINS=http://localhost:3000
 DATA_PROVIDER=mock
+```
 
 ---
 
-## Ejecutar con Docker Compose
+## Despliegue en VPS
 
-Desde la raíz del proyecto:
+El directorio `deploy/` incluye un script de setup para Ubuntu/Debian y un service de systemd. El directorio `nginx/` contiene la configuración de reverse proxy con soporte para HTTPS vía Certbot.
 
-docker compose up -d
-
-Comprobar el backend:
-
-curl http://localhost:5050/health
-
-Ver logs:
-
-docker compose logs -f backend
-docker compose logs -f nginx
+```bash
+# En el servidor (como root)
+bash deploy/setup.sh
+```
 
 ---
 
-## Ejecutar backend en local
+## Aviso legal
 
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app.py
+Este repositorio se publica únicamente como demo técnica y educativa. No aloja, almacena, distribuye, vende ni monetiza contenido audiovisual. No está pensado como plataforma pública de streaming ni como producto comercial.
 
-Backend disponible en:
-
-http://localhost:5050
-
----
-
-## Ejecutar app Flutter
-
-cd frontend_flutter
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5050 --dart-define=API_KEY=your_api_key
-
-En un dispositivo físico dentro de la misma red local, usa la IP LAN del ordenador:
-
-flutter run --dart-define=API_BASE_URL=http://192.168.1.X:5050 --dart-define=API_KEY=your_api_key
-
----
-
-## Finalidad de portfolio
-
-Este repositorio demuestra:
-
-- diseño de APIs backend;
-- arquitectura basada en proveedores;
-- separación entre datos y lógica de negocio;
-- autenticación;
-- caché;
-- persistencia con SQLite;
-- integración con Redis;
-- telemetría;
-- dashboard de monitoreo;
-- integración backend-móvil;
-- despliegue con Docker;
-- desarrollo móvil con Flutter;
-- organización de un proyecto full-stack real.
-
----
-
-## Aviso
-
-Este repositorio se publica únicamente como demo técnica y educativa.
-
-No aloja, almacena, distribuye, vende ni monetiza contenido audiovisual.  
-No está pensado como plataforma pública de streaming ni como producto comercial.
-
-Consulta también DISCLAIMER.md.
+Consulta [DISCLAIMER.md](./DISCLAIMER.md) para más detalle.
