@@ -1,3 +1,5 @@
+# Requiere Docker Compose v2 (plugin 'docker compose').
+# deploy.resources.limits se aplica en modo standalone sin flags adicionales.
 services:
 
   redis:
