@@ -8,13 +8,16 @@ Para levantar el entorno consulta la sección [Inicio rápido](./README.md#inici
 
 ## Ejecutar los tests
 
+Requiere Python 3.12 (versión usada por el CI).
+
 ```bash
 cd backend
+pip install -r requirements.txt
 pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
-No necesitan Redis ni variables de entorno configuradas — `tests/conftest.py` inicializa el entorno de prueba automáticamente.
+No necesitan Redis ni variables de entorno configuradas — `tests/conftest.py` inicializa el entorno de prueba automáticamente. El CI ejecuta exactamente estos mismos pasos en cada push a `main`.
 
 ---
 

@@ -97,10 +97,12 @@ graph TD
     D --> E["Auth — API Key / Bearer"]
     E --> F["Provider layer"]
     F --> G[("Redis · SWR · TTL dinámico")]
-    F --> H["Fuente de datos · mock / real"]
+    F --> H["Fuente de datos · mock provider extensible"]
     C --> I["Telemetría"]
     I -.-> J["Dashboard · Basic Auth"]
 ```
+
+Para un análisis más detallado del ciclo de vida de una petición, la estrategia de caché y el protocolo de sincronización consulta [docs/architecture.md](./docs/architecture.md).
 
 **Infraestructura destacada:**
 
@@ -137,6 +139,29 @@ streamhub-demo/
 
 ---
 
+## Decisiones técnicas
+
+| Decisión | Alternativa descartada | Razón |
+|---|---|---|
+| Nginx termina TLS, FastAPI recibe HTTP | FastAPI con SSL directo | Nginx reenvía `X-Real-IP`; el rate limiter ve la IP del cliente real, no la del proxy |
+| SQLite en modo WAL | SQLite por defecto | WAL permite lecturas concurrentes sin bloquear escrituras — necesario con múltiples workers Uvicorn |
+| Dos capas de caché (Redis + TTLCache) | Solo Redis | TTLCache evita round-trips a Redis para los accesos más frecuentes del mismo worker |
+| TTL dinámico por change count | TTL fijo | Los títulos que cambian más seguido reciben TTL más corto automáticamente, sin configuración por título |
+| SWR con revalidación en background | Invalidar y re-fetch bloqueante | El cliente recibe respuesta inmediata aunque el dato esté envejeciendo; la frescura llega en la siguiente petición |
+| APScheduler en el mismo proceso | Worker o servicio separado | Suficiente para demo; evita infraestructura extra (Redis pub/sub, Celery, etc.) |
+| Patrón Provider para la fuente de datos | Lógica de datos en las rutas | Las rutas no saben si los datos vienen del mock o de un proveedor real; cambiar de modo no toca ninguna ruta |
+
+---
+
+## Limitaciones de la demo pública
+
+- **Solo mock data.** El proveedor real no está incluido en este repositorio. `DATA_PROVIDER=mock` es el único modo funcional sin configuración adicional.
+- **TTLCache no se comparte entre workers.** Con varios workers Uvicorn cada proceso tiene su propia caché en memoria; el hit rate real es más bajo que en un proceso único. Redis sí es compartido.
+- **Flutter sin tests automatizados.** `flutter analyze` verifica tipos pero no hay tests de widget ni de integración.
+- **Protocolo de sincronización usa `animeUrl` como clave JSON.** Artefacto del historial del proyecto; cambiar la clave rompería la sincronización con clientes ya instalados.
+
+---
+
 ## Inicio rápido
 
 ### Con Docker Compose
@@ -148,10 +173,10 @@ cp backend/.env.example backend/.env
 docker compose up -d
 ```
 
-Los servicios arrancan en orden garantizado por healthchecks: `redis` → `backend` → `nginx`. Para verificar que todos están sanos:
+Los servicios arrancan en orden garantizado por healthchecks: `redis` → `backend` → `nginx`. `redis` y `backend` tienen healthcheck propio; `nginx` arranca solo cuando `backend` está sano pero no tiene healthcheck propio, así que aparece como `running`.
 
 ```bash
-docker compose ps          # todos deben aparecer como "healthy"
+docker compose ps          # redis y backend: "healthy" · nginx: "running"
 curl http://localhost/health
 ```
 
@@ -231,10 +256,12 @@ DATA_PROVIDER=mock
 | `GET` | `/latest-episodes` | Episodios recientes |
 | `GET` | `/on-air` | Contenido en emisión |
 | `GET` | `/search?q=` | Búsqueda en el catálogo |
+| `GET` | `/by-genre?genero=` | Listado filtrado por género |
 | `GET` | `/detail?url=` | Detalle de título |
 | `GET` | `/episodes?url=` | Lista de episodios |
 | `GET` | `/sources?url=` | Fuentes de vídeo disponibles |
 | `GET` | `/resolver?url=` | Resolución a URL de reproducción |
+| `POST` | `/prefetch` | Precalentamiento manual de caché (modo demo: no-op) |
 | `POST` | `/auth/register` | Registro de usuario |
 | `POST` | `/auth/login` | Inicio de sesión |
 
