@@ -120,9 +120,6 @@ graph TD
 
 ## Estructura del proyecto
 
-<details>
-<summary>Ver estructura completa</summary>
-
 ```
 streamhub-demo/
 ├── backend/
@@ -137,8 +134,6 @@ streamhub-demo/
 ├── deploy/               # Script de setup para VPS + systemd service
 └── docker-compose.yml
 ```
-
-</details>
 
 ---
 
