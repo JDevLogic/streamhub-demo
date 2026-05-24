@@ -146,10 +146,21 @@ cp backend/.env.example backend/.env
 # Edita backend/.env con tus valores
 
 docker compose up -d
+```
 
-# Verificar que arranca
+Los servicios arrancan en orden garantizado por healthchecks: `redis` → `backend` → `nginx`. Para verificar que todos están sanos:
+
+```bash
+docker compose ps          # todos deben aparecer como "healthy"
 curl http://localhost:5050/health
 ```
+
+| Contenedor | Imagen | Función |
+|---|---|---|
+| `streamhub_redis` | redis:7-alpine | Caché distribuida (128 MB, LRU) |
+| `streamhub_backend` | build local | API FastAPI + Uvicorn |
+| `streamhub_nginx` | nginx:1.27-alpine | Reverse proxy + TLS termination |
+| `certbot` | certbot/certbot | Renovación de certificados SSL |
 
 ### Backend en local
 
@@ -239,7 +250,14 @@ DATA_PROVIDER=mock
 
 ## Modo demo
 
-La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos son ficticios (títulos inventados, imágenes de dominio público). Redis no es necesario en este modo — el backend arranca sin él y opera en degradado (métricas en memoria). El endpoint `/resolver` apunta a un vídeo de Google con licencia Creative Commons, usado únicamente para validar el flujo completo:
+La variable `DATA_PROVIDER=mock` activa el modo demo: todos los datos son ficticios (títulos inventados, imágenes de dominio público). No requiere Redis ni servicios externos — el backend arranca solo y opera en degradado (métricas en memoria en lugar de Redis):
+
+```bash
+# Solo el backend, sin Redis ni Nginx
+DATA_PROVIDER=mock python app.py
+```
+
+El endpoint `/resolver` devuelve un vídeo con licencia Creative Commons para validar el flujo completo de extremo a extremo:
 
 - Reproducción nativa en el player
 - Progreso y "continuar viendo"
@@ -257,6 +275,9 @@ El directorio `nginx/` contiene la configuración para el stack Docker Compose, 
 ```bash
 # En el servidor (como root)
 bash deploy/setup.sh
+
+# Renovar certificado SSL (ejecutar manualmente o desde cron)
+docker compose run --rm certbot
 ```
 
 ---
