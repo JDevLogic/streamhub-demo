@@ -18,8 +18,21 @@ No necesitan Redis ni variables de entorno configuradas — `tests/conftest.py` 
 
 ---
 
+## App Flutter
+
+No hay tests automatizados para el cliente móvil. Para verificar cambios:
+
+```bash
+cd frontend_flutter
+flutter pub get
+flutter analyze
+```
+
+---
+
 ## Convenciones
 
 - Commits en español, imperativo, sin puntuación final.
+- Ramas: `feature/descripcion-corta` o `fix/descripcion-corta`.
 - El backend usa Python 3.10+ con type hints donde aportan claridad.
 - No se aceptan cambios que introduzcan scraping real ni dependencias de fuentes externas de contenido.
