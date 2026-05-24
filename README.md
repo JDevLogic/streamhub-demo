@@ -14,6 +14,9 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
+
+</div>
+
 ---
 
 **Vista general** — métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento.
@@ -24,8 +27,6 @@
 
 **Métricas por endpoint** — requests totales, tiempo promedio y percentil 95 por ruta.
 ![Métricas](docs/screenshots/dashboard-metrics.png)
-
-</div>
 
 ---
 
@@ -91,14 +92,12 @@ graph TD
     A["Cliente Flutter"] -->|"X-API-Key / Bearer"| B["Nginx · reverse proxy + TLS"]
     B --> C["FastAPI"]
     C --> D["Rate limiter · Timing"]
-    C --> E["Telemetría"]
-    C --> F["Auth — API Key / Bearer"]
-    D --> G["Provider layer"]
-    E --> G
-    F --> G
-    G --> H[("Redis · SWR · TTL dinámico")]
-    G --> I["Fuente de datos · mock / real"]
-    E -.-> J["Dashboard · Basic Auth"]
+    D --> E["Auth — API Key / Bearer"]
+    E --> F["Provider layer"]
+    F --> G[("Redis · SWR · TTL dinámico")]
+    F --> H["Fuente de datos · mock / real"]
+    C --> I["Telemetría"]
+    I -.-> J["Dashboard · Basic Auth"]
 ```
 
 **Infraestructura destacada:**
