@@ -81,7 +81,8 @@ streamhub-demo/
 │   ├── routes/           # Endpoints REST organizados por dominio
 │   ├── db/               # Redis, SQLite, métricas y caché service
 │   ├── dashboard/        # Panel de telemetría (HTML + JS + Basic Auth)
-│   └── utils/            # Buffer de logs y registro de actividad
+│   ├── utils/            # Buffer de logs y registro de actividad
+│   └── tests/            # Tests de integración (26 tests, pytest)
 ├── frontend_flutter/     # Cliente Android (Flutter)
 ├── nginx/                # Configuración reverse proxy + HTTPS
 ├── deploy/               # Script de setup para VPS + systemd service
@@ -197,6 +198,12 @@ El directorio `deploy/` incluye un script de setup para Ubuntu/Debian y un servi
 # En el servidor (como root)
 bash deploy/setup.sh
 ```
+
+---
+
+## Contribuir
+
+Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para instrucciones de setup, cómo ejecutar los tests y las convenciones del proyecto.
 
 ---
 
