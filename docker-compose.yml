@@ -16,6 +16,11 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: '0.50'
     logging:
       driver: json-file
       options:
@@ -49,6 +54,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '1.00'
     networks:
       - streamhub_net
     logging:
@@ -71,6 +81,11 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: '0.25'
     networks:
       - streamhub_net
     logging:

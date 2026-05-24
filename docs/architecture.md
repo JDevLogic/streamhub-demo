@@ -86,23 +86,23 @@ Flujo completo:
 ```
 POST /auth/register  →  crea usuario en SQLite
 POST /auth/login     →  devuelve { token, expires_at }
-GET  /auth/me        →  valida JWT, devuelve perfil
+GET  /auth/me        →  valida token de sesión en SQLite, devuelve perfil
 GET  /user/state     →  descarga estado (Mi Lista, progreso)
 POST /user/state     →  sube estado desde el cliente
 ```
 
-Los tokens se almacenan en SQLite (tabla `sessions`) junto con su fecha de expiración. La validación comprueba firma y expiración; los tokens revocados se marcan como inactivos sin borrarlos (para poder auditar).
+Los tokens son strings aleatorios (`secrets.token_urlsafe(48)`) almacenados en la tabla `user_sessions` junto con su fecha de expiración. La validación comprueba existencia y `expires_at`. Logout elimina la fila; tokens expirados permanecen hasta limpieza periódica.
 
 ---
 
 ## Roles de SQLite
 
-Una sola base de datos (`anime_cache.db`) con cuatro responsabilidades:
+Una sola base de datos (`streamhub_cache.db`) con cuatro responsabilidades:
 
 | Tabla | Uso |
 |---|---|
 | `rate_limit_log` | Registro de peticiones para sliding-window |
-| `users` + `sessions` | Autenticación y gestión de tokens Bearer |
+| `users` + `user_sessions` | Autenticación y gestión de tokens Bearer |
 | `user_state` | Estado sincronizado del usuario (Mi Lista, progreso) |
 | `telemetry` | Actividad y métricas durables (complementa el buffer en memoria) |
 | `intro_skips` | Timestamps de intro por episodio (feature del dashboard) |

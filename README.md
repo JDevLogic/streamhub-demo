@@ -245,13 +245,13 @@ DATA_PROVIDER=mock
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/health` | Estado del servicio y Redis |
-| `GET` | `/metrics` | Métricas de latencia por ruta |
 | `GET` | `/dashboard` | Panel de monitoreo (Basic Auth) |
 
 **API Key** — header `X-API-Key`
 
 | Método | Ruta | Descripción |
 |---|---|---|
+| `GET` | `/metrics` | Métricas de latencia por ruta |
 | `GET` | `/catalog` | Catálogo de contenido |
 | `GET` | `/latest-episodes` | Episodios recientes |
 | `GET` | `/on-air` | Contenido en emisión |

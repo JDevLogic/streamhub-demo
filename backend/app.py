@@ -4,7 +4,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -15,7 +15,7 @@ from routes.detail_routes import router as detail_router
 from dashboard.routes import router as dashboard_router
 from routes.auth_routes import router as auth_router
 from routes.user_state_routes import router as user_state_router
-from security import SQLiteRateLimiter
+from security import SQLiteRateLimiter, require_api_key
 from db.database import DB_PATH, init_db
 from db.redis_client import connect as redis_connect
 from db import metrics
@@ -115,7 +115,7 @@ async def health():
     return {"status": "ok", "service": "streamhub-backend", "redis": redis_ok()}
 
 
-@app.get("/metrics")
+@app.get("/metrics", dependencies=[Depends(require_api_key)])
 async def get_metrics():
     return metrics.snapshot()
 
