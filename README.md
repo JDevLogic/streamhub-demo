@@ -8,6 +8,14 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
+## Vista previa
+
+![Vista general](docs/screenshots/dashboard-overview.png)
+![Actividad](docs/screenshots/dashboard-activity.png)
+![Métricas](docs/screenshots/dashboard-metrics.png)
+
+---
+
 > Plataforma de streaming full-stack construida como portfolio técnico. Combina una API REST con FastAPI, caché en dos capas con Redis, autenticación completa, dashboard de telemetría propio y un cliente móvil nativo en Flutter.
 
 ---
