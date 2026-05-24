@@ -125,7 +125,7 @@ Para un análisis más detallado del ciclo de vida de una petición, la estrateg
 ```
 streamhub-demo/
 ├── backend/
-│   ├── providers/        # Abstracción de fuente de datos (mock / real)
+│   ├── providers/        # Abstracción de fuente de datos (mock provider extensible)
 │   ├── routes/           # Endpoints REST organizados por dominio
 │   ├── db/               # Redis, SQLite, métricas y caché service
 │   ├── dashboard/        # Panel de telemetría (HTML + JS + Basic Auth)
