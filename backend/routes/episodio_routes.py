@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from providers.provider_factory import get_provider
@@ -15,5 +15,5 @@ async def get_episodios(url: str = ""):
         raise HTTPException(status_code=400, detail="Falta parámetro url")
 
     data = provider.get_episodios(url.strip())
-    return JSONResponse(data)
-
+    return JSONResponse(data)
+

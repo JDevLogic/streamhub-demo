@@ -56,11 +56,11 @@ def classify_error(error: str | None) -> str:
     low = raw.lower()
     cls = raw.partition(": ")[0].strip().lower()
 
-    # ── timeouts ──────────────────────────────────────────────────────
+    # -- timeouts ------------------------------------------------------
     if "timeout" in cls or "timed out" in low or "timeout" in low:
         return "timeout"
 
-    # ── connection-level failures ─────────────────────────────────────
+    # -- connection-level failures -------------------------------------
     if (
         "connectionerror" in cls
         or "newconnectionerror" in cls
@@ -77,13 +77,13 @@ def classify_error(error: str | None) -> str:
     ):
         return "connection"
 
-    # ── malformed JSON payload ────────────────────────────────────────
+    # -- malformed JSON payload ----------------------------------------
     if "jsondecodeerror" in cls or "expecting value" in low or (
         "json" in low and "decod" in low
     ):
         return "json"
 
-    # ── explicit HTTP status code ─────────────────────────────────────
+    # -- explicit HTTP status code -------------------------------------
     if "http" in low or "status" in low:
         m = _STATUS_RE.search(raw)
         code = int(m.group(1)) if m else None
@@ -95,14 +95,14 @@ def classify_error(error: str | None) -> str:
             if 400 <= code <= 499:
                 return "http_4xx"
 
-    # ── stale / expired video URL wording ─────────────────────────────
+    # -- stale / expired video URL wording -----------------------------
     if any(k in low for k in (
         "expired", "expir", "caducad", "token",
         "no longer available", "gone",
     )):
         return "expired"
 
-    # ── page fetched but structure changed / nothing matched ──────────
+    # -- page fetched but structure changed / nothing matched ----------
     if (
         cls in ("attributeerror", "indexerror", "keyerror", "typeerror")
         or "nonetype" in low

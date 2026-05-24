@@ -1,4 +1,4 @@
-﻿"""Demo source health tracking for the public portfolio version.
+"""Demo source health tracking for the public portfolio version.
 
 This module keeps the same public functions used by the dashboard, but only
 tracks safe demo sources.
@@ -193,5 +193,5 @@ def track_source(name: str, track_empty: bool = False) -> Callable:
 
         return _wrapper
 
-    return _decorator
-
+    return _decorator
+

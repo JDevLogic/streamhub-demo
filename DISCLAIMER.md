@@ -1,4 +1,4 @@
-﻿# Disclaimer
+# Disclaimer
 
 StreamHub Demo es un proyecto educativo full-stack creado para practicar arquitectura backend, APIs REST, caché, autenticación, telemetría, despliegue con Docker y desarrollo móvil con Flutter.
 

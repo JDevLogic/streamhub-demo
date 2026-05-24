@@ -1,4 +1,4 @@
-﻿“””Admin dashboard — visual control centre for the StreamHub backend.
+“””Admin dashboard — visual control centre for the StreamHub backend.
 
 Routes
 ------
@@ -42,7 +42,7 @@ from utils import log_buffer, activity
 router = APIRouter()
 _security = HTTPBasic()
 
-# â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Auth -----------------------------------------------------------------------
 
 _DASHBOARD_USER = os.environ.get("DASHBOARD_USER", "")
 _DASHBOARD_PASS = os.environ.get("DASHBOARD_PASS", "")
@@ -71,7 +71,7 @@ def _require_auth(credentials: HTTPBasicCredentials = Depends(_security)):
     return credentials.username
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Helpers --------------------------------------------------------------------
 
 def _uptime_str(seconds: float) -> str:
     s = int(seconds)
@@ -128,7 +128,7 @@ def _db_size_mb() -> float:
         return 0.0
 
 
-# â”€â”€ API endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- API endpoints --------------------------------------------------------------
 
 @router.get("/dashboard/api/stats")
 async def api_stats(_user=Depends(_require_auth)):
@@ -183,7 +183,7 @@ async def api_cache_clear(request: Request, _user=Depends(_require_auth)):
     }
     prefix = prefix_map.get(table)
     if not prefix:
-        raise HTTPException(status_code=400, detail=f"tabla invÃ¡lida: {table}")
+        raise HTTPException(status_code=400, detail=f"tabla inválida: {table}")
     if not _rc.is_available():
         raise HTTPException(status_code=503, detail="Redis no disponible")
     cursor = 0
@@ -473,7 +473,7 @@ async def api_system(_user=Depends(_require_auth)):
     }
 
 
-# â”€â”€ Source health â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Source health --------------------------------------------------------------
 
 # Demo source health probes -----------------------------------------------------
 
@@ -679,7 +679,7 @@ async def api_user_delete(user_id: int, _user=Depends(_require_auth)):
     return {"ok": True, "deleted_user_id": user_id}
 
 
-# â”€â”€ Debug Console endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Debug Console endpoints ---------------------------------------------------
 
 @router.get("/dashboard/api/debug/search")
 async def api_debug_search(q: str = "", _user=Depends(_require_auth)):
@@ -763,7 +763,7 @@ async def api_debug_resolve(url: str = "", _user=Depends(_require_auth)):
         "mode": "demo",
     }
 
-# â”€â”€ Public read-only endpoint (no auth) â€” used by the Flutter app â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Public read-only endpoint (no auth) â€” used by the Flutter app --------------
 
 @router.get("/intro-skip")
 async def intro_skip_public(url: str = ""):
@@ -782,7 +782,7 @@ async def intro_skip_public(url: str = ""):
     return {"intro_start": row["intro_start"], "intro_end": row["intro_end"]}
 
 
-# â”€â”€ HTML Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- HTML Dashboard -------------------------------------------------------------
 
 # Dashboard HTML is assembled in dashboard.templates (DASHBOARD_HTML).
 

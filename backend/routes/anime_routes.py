@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from providers.provider_factory import get_provider
@@ -51,5 +51,5 @@ async def prefetch_animes():
 
     En la versión pública no realiza scraping ni llamadas externas.
     """
-    return {"queued": 0, "mode": "demo"}
-
+    return {"queued": 0, "mode": "demo"}
+

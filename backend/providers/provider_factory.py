@@ -1,4 +1,4 @@
-﻿import os
+import os
 
 from providers.mock_provider import provider as mock_provider
 
@@ -12,5 +12,5 @@ def get_provider():
             "Esta versión pública solo soporta DATA_PROVIDER=mock."
         )
 
-    return mock_provider
-
+    return mock_provider
+

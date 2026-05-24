@@ -1,4 +1,4 @@
-﻿"""Scheduler demo para la versión pública.
+"""Scheduler demo para la versión pública.
 
 Mantiene la estructura de tareas programadas del backend, pero no realiza
 scraping ni llamadas a fuentes externas no oficiales.
@@ -86,4 +86,4 @@ def stop_scheduler() -> None:
         _scheduler.shutdown(wait=False)
         _log.info("Demo scheduler stopped")
 
-    _scheduler = None
+    _scheduler = None

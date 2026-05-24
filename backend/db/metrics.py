@@ -15,7 +15,7 @@ from collections import defaultdict, deque
 
 from db import redis_client as _rc
 
-# ── In-memory fallback ────────────────────────────────────────────────
+# -- In-memory fallback ------------------------------------------------
 
 _lock   = threading.Lock()
 _fb_hits:   dict[str, int]          = defaultdict(int)

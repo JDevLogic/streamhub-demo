@@ -19,7 +19,7 @@ from db import redis_client as _rc
 
 _MAX = 500
 
-# ── In-memory fallback ────────────────────────────────────────────────
+# -- In-memory fallback ------------------------------------------------
 
 _lock = threading.Lock()
 _fallback: deque[dict] = deque(maxlen=_MAX)

@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from providers.provider_factory import get_provider
@@ -24,5 +24,5 @@ async def get_resolver(url: str = ""):
         raise HTTPException(status_code=400, detail="Falta parámetro url")
 
     data = provider.resolver(url.strip())
-    return JSONResponse(data)
-
+    return JSONResponse(data)
+

@@ -19,7 +19,7 @@ from db import redis_client as _rc
 
 MAX_LINES = 2000  # keep more history now that storage is cheap
 
-# ── In-memory fallback ────────────────────────────────────────────────
+# -- In-memory fallback ------------------------------------------------
 
 _lock = threading.Lock()
 _fallback: deque[dict] = deque(maxlen=MAX_LINES)

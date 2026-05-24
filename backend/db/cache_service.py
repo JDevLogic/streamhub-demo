@@ -31,7 +31,7 @@ from db import metrics
 
 _log = logging.getLogger(__name__)
 
-# ── TTL constants (seconds) ────────────────────────────────────────────
+# -- TTL constants (seconds) --------------------------------------------
 ANIME_TTL      = 86_400   # 24 h base
 EPISODIOS_TTL  =  3_600   #  1 h base
 SERVIDORES_TTL =  3_600   #  1 h (fixed) — embed list is stable; only the
@@ -46,7 +46,7 @@ _TTL_STEP_FACTOR  = 0.10
 STALE_FACTOR = 0.75
 
 
-# ── TTL helpers ────────────────────────────────────────────────────────
+# -- TTL helpers --------------------------------------------------------
 
 def get_dynamic_ttl(base_ttl: int, change_count: int) -> int:
     """Scale TTL down as an entry changes more often.
@@ -65,7 +65,7 @@ def get_dynamic_ttl(base_ttl: int, change_count: int) -> int:
     return max(floor, reduced)
 
 
-# ── Private helpers ────────────────────────────────────────────────────
+# -- Private helpers ----------------------------------------------------
 
 def _redis_get_raw(key: str, kind: str, *, log_url: str | None = None) -> str | None:
     """Fetch a raw Redis value, recording hit/miss metrics and optional logs.
@@ -132,7 +132,7 @@ def _save_tracked(
         _log.debug("Redis %s failed: %s", op_name, exc)
 
 
-# ── Anime detail ───────────────────────────────────────────────────────
+# -- Anime detail -------------------------------------------------------
 
 def get_anime_from_cache(url: str) -> dict | None:
     """Return cached anime detail or None if missing / expired."""
@@ -192,7 +192,7 @@ def save_anime_to_cache(url: str, data: dict) -> None:
     )
 
 
-# ── Episodios ──────────────────────────────────────────────────────────
+# -- Episodios ----------------------------------------------------------
 
 def get_episodios_from_cache(anime_url: str) -> list | None:
     """Return cached episode list or None if missing / expired."""
@@ -251,7 +251,7 @@ def save_episodios_to_cache(anime_url: str, data: list) -> None:
     )
 
 
-# ── Servidores ─────────────────────────────────────────────────────────
+# -- Servidores ---------------------------------------------------------
 
 def get_servidores_from_cache(episodio_url: str) -> list | None:
     """Return cached server list or None if missing / expired."""

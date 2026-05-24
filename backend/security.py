@@ -1,4 +1,4 @@
-﻿"""Autenticación por API Key, rate limiting SQLite y validación básica de URLs para demo pública."""
+"""Autenticación por API Key, rate limiting SQLite y validación básica de URLs para demo pública."""
 
 import os
 import sqlite3
