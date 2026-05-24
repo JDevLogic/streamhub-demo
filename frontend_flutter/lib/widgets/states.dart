@@ -479,7 +479,7 @@ class ShimmerGrid extends StatelessWidget {
         mainAxisSpacing: 16,
         childAspectRatio: 0.52,
       ),
-      itemBuilder: (_, __) => const AnimeCardSkeleton(),
+      itemBuilder: (_, __) => const CardSkeleton(),
     );
   }
 }

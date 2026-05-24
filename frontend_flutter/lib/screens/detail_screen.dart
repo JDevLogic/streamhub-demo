@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../providers/auth_provider.dart';
 import '../providers/my_list_provider.dart';
 import '../services/watch_history.dart';
@@ -13,7 +13,7 @@ import '../widgets/states.dart' show ShimmerBox, TappableScale;
 import 'episodios_screen.dart';
 
 // ---------------------------------------------------------------------------
-// Pantalla de ficha / detalle de un anime
+// Pantalla de detalle de contenido
 // ---------------------------------------------------------------------------
 
 const _kImageHeaders = {
@@ -22,66 +22,66 @@ const _kImageHeaders = {
       ' (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
 };
 
-String _normalizeAnimeUrl(String raw) {
+String _normalizeContentUrl(String raw) {
   var url = raw.trim();
   if (url.isEmpty) return '';
   if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('demo://')) {
-    url = 'demo://anime/';
+    url = 'demo://content/';
   }
   return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
 }
 
-class AnimeDetailScreen extends ConsumerStatefulWidget {
-  const AnimeDetailScreen({
+class DetailScreen extends ConsumerStatefulWidget {
+  const DetailScreen({
     super.key,
-    required this.animeTitle,
-    required this.animeUrl,
-    this.animeImage = '',
+    required this.contentTitle,
+    required this.contentUrl,
+    this.contentImage = '',
   });
 
-  final String animeTitle;
-  final String animeUrl;
-  final String animeImage;
+  final String contentTitle;
+  final String contentUrl;
+  final String contentImage;
 
   @override
-  ConsumerState<AnimeDetailScreen> createState() => _AnimeDetailScreenState();
+  ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
+class _DetailScreenState extends ConsumerState<DetailScreen> {
   bool _synopsisExpanded = false;
-  late final String _normalizedAnimeUrl;
+  late final String _normalizedContentUrl;
 
   @override
   void initState() {
     super.initState();
-    _normalizedAnimeUrl = _normalizeAnimeUrl(widget.animeUrl);
+    _normalizedContentUrl = _normalizeContentUrl(widget.contentUrl);
   }
 
   Future<void> _refreshDetail() async {
-    ref.invalidate(detailProvider(_normalizedAnimeUrl));
+    ref.invalidate(detailProvider(_normalizedContentUrl));
     try {
-      await ref.read(detailProvider(_normalizedAnimeUrl).future);
+      await ref.read(detailProvider(_normalizedContentUrl).future);
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final detailAsync = ref.watch(detailProvider(_normalizedAnimeUrl));
+    final detailAsync = ref.watch(detailProvider(_normalizedContentUrl));
     final episodeCountAsync =
-        ref.watch(episodeCountProvider(_normalizedAnimeUrl));
+        ref.watch(episodeCountProvider(_normalizedContentUrl));
 
     // Silently refresh the stored cover in Mi Lista when the detail loads.
     // Prefer the provider image over AniList HD, which uses fuzzy matching
     // and can return the wrong cover for sequels/related entries.
     ref.listen<AsyncValue<Map<String, dynamic>>>(
-      detailProvider(_normalizedAnimeUrl),
+      detailProvider(_normalizedContentUrl),
       (_, next) {
         next.whenData((data) {
           final providerImage = (data['imagen'] ?? '').toString();
           final hd = (data['imagen_hd'] ?? '').toString();
           final best = providerImage.isNotEmpty ? providerImage : hd;
           if (best.isEmpty) return;
-          WatchHistory.updateMyListImage(_normalizedAnimeUrl, best);
+          WatchHistory.updateMyListImage(_normalizedContentUrl, best);
         });
       },
     );
@@ -90,8 +90,8 @@ class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
     // while the provider loads. No blank screen.
     final info = detailAsync.valueOrNull ??
         {
-          'titulo': widget.animeTitle,
-          'imagen': widget.animeImage,
+          'titulo': widget.contentTitle,
+          'imagen': widget.contentImage,
           'imagen_hd': '',
           'banner': '',
           'tipo': '',
@@ -131,17 +131,17 @@ class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
                     )
                   : _Body(
                       info: mergedInfo,
-                      animeUrl: _normalizedAnimeUrl,
-                      fallbackImage: widget.animeImage,
+                      contentUrl: _normalizedContentUrl,
+                      fallbackImage: widget.contentImage,
                       synopsisExpanded: _synopsisExpanded,
                       loading: loading,
                       detailError: detailAsync.hasError,
                       onRetryDetail: _refreshDetail,
                       onEpisodesClosed: () {
                         ref.invalidate(
-                            episodeCountProvider(_normalizedAnimeUrl));
+                            episodeCountProvider(_normalizedContentUrl));
                         ref.invalidate(
-                            detailProvider(_normalizedAnimeUrl));
+                            detailProvider(_normalizedContentUrl));
                       },
                       onToggleSynopsis: () => setState(
                         () => _synopsisExpanded = !_synopsisExpanded,
@@ -178,7 +178,7 @@ class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
 class _Body extends StatelessWidget {
   const _Body({
     required this.info,
-    required this.animeUrl,
+    required this.contentUrl,
     required this.fallbackImage,
     required this.synopsisExpanded,
     required this.loading,
@@ -189,7 +189,7 @@ class _Body extends StatelessWidget {
   });
 
   final Map<String, dynamic> info;
-  final String animeUrl;
+  final String contentUrl;
   final String fallbackImage;
   final bool synopsisExpanded;
   final bool loading;
@@ -253,7 +253,7 @@ class _Body extends StatelessWidget {
               children: [
                 if (imagen.isNotEmpty)
                   Hero(
-                    tag: 'anime-cover-$animeUrl',
+                    tag: 'cover-$contentUrl',
                     child: ResilientCachedImage(
                       imageUrl: heroImage,
                       fit: BoxFit.cover,
@@ -561,7 +561,7 @@ class _Body extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: _MyListControls(
-                animeUrl: animeUrl,
+                contentUrl: contentUrl,
                 titulo: titulo,
                 imagen: imagen,
                 epsCount: epsCount,
@@ -591,10 +591,10 @@ class _Body extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => EpisodiosScreen(
-                        animeTitle: titulo,
-                        animeUrl: animeUrl,
-                        animeImage: imagen,
-                        animeStatus: estado,
+                        contentTitle: titulo,
+                        contentUrl: contentUrl,
+                        contentImage: imagen,
+                        contentStatus: estado,
                       ),
                     ),
                   );
@@ -632,7 +632,7 @@ class _Body extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                  child: Text('Animes Relacionados',
+                  child: Text('Relacionados',
                       style: GoogleFonts.sora(
                         color: VoidTheme.text,
                         fontSize: 16,
@@ -656,7 +656,7 @@ class _Body extends StatelessWidget {
                           ? rImagenHd
                           : (r['imagen'] ?? '').toString();
 
-                      return _RelatedAnimeCard(
+                      return _RelatedCard(
                         title: rTitulo,
                         url: rUrl,
                         relationType: rTipo,
@@ -703,8 +703,8 @@ class _GlassBadge extends StatelessWidget {
   }
 }
 
-class _RelatedAnimeCard extends ConsumerWidget {
-  const _RelatedAnimeCard({
+class _RelatedCard extends ConsumerWidget {
+  const _RelatedCard({
     required this.title,
     required this.url,
     required this.relationType,
@@ -718,7 +718,7 @@ class _RelatedAnimeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final normalizedUrl = _normalizeAnimeUrl(url);
+    final normalizedUrl = _normalizeContentUrl(url);
     final needsFallback = image.isEmpty && url.isNotEmpty;
     final detailAsync =
         needsFallback ? ref.watch(detailProvider(normalizedUrl)) : null;
@@ -743,10 +743,10 @@ class _RelatedAnimeCard extends ConsumerWidget {
           : () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AnimeDetailScreen(
-                    animeTitle: title,
-                    animeUrl: normalizedUrl,
-                    animeImage: finalImage,
+                  builder: (_) => DetailScreen(
+                    contentTitle: title,
+                    contentUrl: normalizedUrl,
+                    contentImage: finalImage,
                   ),
                 ),
               ),
@@ -840,13 +840,13 @@ class _RelatedAnimeCard extends ConsumerWidget {
 
 class _MyListControls extends ConsumerWidget {
   const _MyListControls({
-    required this.animeUrl,
+    required this.contentUrl,
     required this.titulo,
     required this.imagen,
     required this.epsCount,
   });
 
-  final String animeUrl;
+  final String contentUrl;
   final String titulo;
   final String imagen;
   final int epsCount;
@@ -857,7 +857,7 @@ class _MyListControls extends ConsumerWidget {
     // but guest logic previously hid Continuar Viendo.
     // Let's allow guest to see it but prompt if they tap (or just let authgate handle later, but better block guests).
     final isGuest = ref.watch(authProvider).isGuest;
-    final statusAsync = ref.watch(animeMyListStatusProvider(animeUrl));
+    final statusAsync = ref.watch(myListStatusProvider(contentUrl));
 
     final currentStatus = statusAsync.valueOrNull;
     final isInList = currentStatus != null;
@@ -885,10 +885,10 @@ class _MyListControls extends ConsumerWidget {
       if (newStatus == null) {
         // Toggle heart (remove or add default)
         if (isInList) {
-          await WatchHistory.removeFromMyList(animeUrl);
+          await WatchHistory.removeFromMyList(contentUrl);
         } else {
           await WatchHistory.saveToMyList(
-            animeUrl: animeUrl,
+            contentUrl: contentUrl,
             titulo: titulo,
             imagen: imagen,
             status: 'planeado', // default when tapping heart without status
@@ -899,7 +899,7 @@ class _MyListControls extends ConsumerWidget {
       } else {
         // Change from dropdown
         await WatchHistory.saveToMyList(
-          animeUrl: animeUrl,
+          contentUrl: contentUrl,
           titulo: titulo,
           imagen: imagen,
           status: newStatus,
@@ -910,7 +910,7 @@ class _MyListControls extends ConsumerWidget {
           totalEpisodes: epsCount,
         );
       }
-      ref.invalidate(animeMyListStatusProvider(animeUrl));
+      ref.invalidate(myListStatusProvider(contentUrl));
       ref.invalidate(myListProvider);
     }
 

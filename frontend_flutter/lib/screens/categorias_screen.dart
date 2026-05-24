@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../theme.dart';
 import '../widgets/resilient_cached_image.dart';
 import '../widgets/search_button.dart';
 import '../widgets/states.dart';
-import 'anime_detail_screen.dart';
+import 'detail_screen.dart';
 
 // ── Definición de géneros ─────────────────────────────────────────────────────
 
@@ -88,14 +88,14 @@ class CategoriasScreen extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const AnimeSearchButton(margin: EdgeInsets.zero),
+                  const SearchButton(margin: EdgeInsets.zero),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 6, 20, 16),
               child: Text(
-                'Explora anime por género',
+                'Explora por género',
                 style: GoogleFonts.sora(
                   color: VoidTheme.textSecondary,
                   fontSize: 13,
@@ -119,7 +119,7 @@ class CategoriasScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => _GeneroAnimesScreen(genero: genero),
+                        builder: (_) => _GenreScreen(genero: genero),
                       ),
                     ),
                   );
@@ -192,26 +192,26 @@ class _GeneroCard extends StatelessWidget {
   }
 }
 
-// ── Sub-pantalla: animes del género ──────────────────────────────────────────
+// ── Sub-pantalla: contenido del género ──────────────────────────────────────────
 
-class _GeneroAnimesScreen extends ConsumerWidget {
-  const _GeneroAnimesScreen({required this.genero});
+class _GenreScreen extends ConsumerWidget {
+  const _GenreScreen({required this.genero});
 
   final _Genero genero;
 
-  void _openAnime(BuildContext context, Map<String, dynamic> anime) {
-    final titulo = (anime['titulo'] ?? '').toString();
-    final imagenHd = (anime['imagen_hd'] ?? '').toString();
+  void _openContent(BuildContext context, Map<String, dynamic> item) {
+    final titulo = (item['titulo'] ?? '').toString();
+    final imagenHd = (item['imagen_hd'] ?? '').toString();
     final imagen =
-        imagenHd.isNotEmpty ? imagenHd : (anime['imagen'] ?? '').toString();
-    final url = (anime['url'] ?? '').toString();
+        imagenHd.isNotEmpty ? imagenHd : (item['imagen'] ?? '').toString();
+    final url = (item['url'] ?? '').toString();
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AnimeDetailScreen(
-          animeTitle: titulo,
-          animeUrl: url,
-          animeImage: imagen,
+        builder: (_) => DetailScreen(
+          contentTitle: titulo,
+          contentUrl: url,
+          contentImage: imagen,
         ),
       ),
     );
@@ -219,7 +219,7 @@ class _GeneroAnimesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final animesAsync = ref.watch(byGenreProvider(genero.slug));
+    final contentsAsync = ref.watch(byGenreProvider(genero.slug));
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -259,10 +259,10 @@ class _GeneroAnimesScreen extends ConsumerWidget {
             onPressed: () =>
                 ref.invalidate(byGenreProvider(genero.slug)),
           ),
-          const AnimeSearchButton(),
+          const SearchButton(),
         ],
       ),
-      body: animesAsync.when(
+      body: contentsAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: VoidTheme.primary),
         ),
@@ -272,11 +272,11 @@ class _GeneroAnimesScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(byGenreProvider(genero.slug)),
           ),
         ),
-        data: (animes) {
-          if (animes.isEmpty) {
+        data: (items) {
+          if (items.isEmpty) {
             return Center(
               child: Text(
-                'No se encontraron animes en esta categoría.',
+                'No se encontró contenido en esta categoría.',
                 style: GoogleFonts.sora(color: VoidTheme.textSecondary),
               ),
             );
@@ -298,22 +298,22 @@ class _GeneroAnimesScreen extends ConsumerWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 24,
               ),
-              itemCount: animes.length,
+              itemCount: items.length,
               itemBuilder: (context, i) {
-                final anime = animes[i];
-                final titulo = (anime['titulo'] ?? '').toString();
-                final imagenHd = (anime['imagen_hd'] ?? '').toString();
+                final item = items[i];
+                final titulo = (item['titulo'] ?? '').toString();
+                final imagenHd = (item['imagen_hd'] ?? '').toString();
                 final imagen = imagenHd.isNotEmpty
                     ? imagenHd
-                    : (anime['imagen'] ?? '').toString();
-                final tipo = (anime['tipo'] ?? '').toString();
+                    : (item['imagen'] ?? '').toString();
+                final tipo = (item['tipo'] ?? '').toString();
 
-                return _AnimeGridItem(
+                return _ContentGridItem(
                   titulo: titulo,
                   imagen: imagen,
                   tipo: tipo,
                   accentColor: genero.color,
-                  onTap: () => _openAnime(context, anime),
+                  onTap: () => _openContent(context, item),
                 );
               },
             ),
@@ -324,10 +324,10 @@ class _GeneroAnimesScreen extends ConsumerWidget {
   }
 }
 
-// ── Item de grid de anime ─────────────────────────────────────────────────────
+// ── Item de grid de contenido ─────────────────────────────────────────────────────
 
-class _AnimeGridItem extends StatelessWidget {
-  const _AnimeGridItem({
+class _ContentGridItem extends StatelessWidget {
+  const _ContentGridItem({
     required this.titulo,
     required this.imagen,
     required this.tipo,

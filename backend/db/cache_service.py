@@ -8,7 +8,7 @@ If Redis is unavailable, every get returns None (triggering a scrape)
 and every save is silently skipped.
 
 TTL hierarchy (RAM > Redis > Scraping):
-  Content detail : 6-24 h  (dynamic: shrinks as the anime gains new episodes)
+  Content detail : 6-24 h  (dynamic: shrinks as the content gains new episodes)
   Episodes    : 30min-1h (dynamic: same logic)
   Sources   : 1 h     (fixed -- the embed list is stable; the short-lived
                           resolved MP4 is handled separately by /resolver)
@@ -188,7 +188,7 @@ def save_detail_to_cache(url: str, data: dict) -> None:
         data=data,
         count_now=int(data.get("episodios_count") or 0),
         prev_key="prev_ep_count",
-        op_name="save_anime",
+        op_name="save_detail",
     )
 
 

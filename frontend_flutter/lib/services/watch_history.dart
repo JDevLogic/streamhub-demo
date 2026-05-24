@@ -20,7 +20,7 @@ class WatchHistory {
   /// Migrates existing SharedPreferences data to SQLite on first run.
   static Future<void> init() => _database.migrateFromPrefs();
 
-  // --------------- Anime-level (home "Últimos Vistos") ---------------
+  // --------------- Content-level (home "Últimos Vistos") ---------------
 
   static Future<void> add({
     required String titulo,
@@ -113,8 +113,8 @@ class WatchHistory {
     await _pushCloudIfLoggedIn();
   }
 
-  static Future<String?> getLastEpisodeUrl(String animeUrl) async {
-    final entry = await _database.getAnime(animeUrl);
+  static Future<String?> getLastEpisodeUrl(String contentUrl) async {
+    final entry = await _database.getAnime(contentUrl);
     return entry?.lastEpUrl;
   }
 
@@ -171,7 +171,7 @@ class WatchHistory {
     final rows = await _database.getAllMyList();
     return rows
         .map((r) => {
-              'animeUrl': r.animeUrl,
+              'animeUrl': r.contentUrl,
               'titulo': r.titulo,
               'imagen': r.imagen,
               'status': r.status,
@@ -182,13 +182,13 @@ class WatchHistory {
         .toList();
   }
 
-  static Future<String?> getMyListStatus(String animeUrl) async {
-    final entry = await _database.getMyListEntry(animeUrl);
+  static Future<String?> getMyListStatus(String contentUrl) async {
+    final entry = await _database.getMyListEntry(contentUrl);
     return entry?.status;
   }
 
   static Future<void> saveToMyList({
-    required String animeUrl,
+    required String contentUrl,
     required String titulo,
     required String imagen,
     required String status,
@@ -197,7 +197,7 @@ class WatchHistory {
   }) async {
     await _database.upsertMyListEntry(
       MyListEntriesCompanion.insert(
-        animeUrl: animeUrl,
+        contentUrl: contentUrl,
         titulo: titulo,
         imagen: Value(imagen),
         status: status,
@@ -209,20 +209,20 @@ class WatchHistory {
     await _pushCloudIfLoggedIn();
   }
 
-  static Future<void> removeFromMyList(String animeUrl) async {
-    await _database.removeMyListEntry(animeUrl);
+  static Future<void> removeFromMyList(String contentUrl) async {
+    await _database.removeMyListEntry(contentUrl);
     await _pushCloudIfLoggedIn();
   }
 
   /// Updates only the stored cover image for an existing Mi Lista entry.
   /// No-ops if the entry doesn't exist or the image is already up to date.
-  static Future<void> updateMyListImage(String animeUrl, String imagen) async {
+  static Future<void> updateMyListImage(String contentUrl, String imagen) async {
     if (imagen.isEmpty) return;
-    final entry = await _database.getMyListEntry(animeUrl);
+    final entry = await _database.getMyListEntry(contentUrl);
     if (entry == null || entry.imagen == imagen) return;
     await _database.upsertMyListEntry(
       MyListEntriesCompanion(
-        animeUrl: Value(entry.animeUrl),
+        contentUrl: Value(entry.contentUrl),
         titulo: Value(entry.titulo),
         imagen: Value(imagen),
         status: Value(entry.status),
@@ -243,13 +243,13 @@ class WatchHistory {
     await _pushCloudIfLoggedIn();
   }
 
-  /// Automatically increment watched episodes if the anime is in My List.
-  /// Auto-sets 'completado' only when [animeIsFinished] is true.
+  /// Automatically increment watched episodes if the content is in My List.
+  /// Auto-sets 'completado' only when [contentIsFinished] is true.
   static Future<void> handleEpisodeFinished(
-    String animeUrl, {
-    bool animeIsFinished = false,
+    String contentUrl, {
+    bool contentIsFinished = false,
   }) async {
-    final entry = await _database.getMyListEntry(animeUrl);
+    final entry = await _database.getMyListEntry(contentUrl);
     // User condition: Do not auto-add if it's not in the list.
     if (entry == null) return;
 
@@ -259,19 +259,19 @@ class WatchHistory {
     // Cap at current known total.
     if (entry.totalEpisodes > 0 && newWatched >= entry.totalEpisodes) {
       newWatched = entry.totalEpisodes;
-      if (animeIsFinished) {
+      if (contentIsFinished) {
         newStatus = 'completado';
       } else if (newStatus == 'planeado') {
         newStatus = 'en_proceso';
       }
     } else if (newStatus == 'planeado' && newWatched > 0) {
-      // If they started watching a planned anime, it's now in process
+      // If they started watching a planned title, it's now in process
       newStatus = 'en_proceso';
     }
 
     await _database.upsertMyListEntry(
       MyListEntriesCompanion.insert(
-        animeUrl: entry.animeUrl,
+        contentUrl: entry.contentUrl,
         titulo: entry.titulo,
         imagen: Value(entry.imagen),
         status: newStatus,
@@ -286,12 +286,12 @@ class WatchHistory {
   /// Reconciles My List progress using the real watched count from episodes UI.
   /// Useful to keep My List in sync when users manually toggle watched/unwatched.
   static Future<void> syncMyListEpisodeCount({
-    required String animeUrl,
+    required String contentUrl,
     required int watchedCount,
     required int totalEpisodes,
-    bool animeIsFinished = false,
+    bool contentIsFinished = false,
   }) async {
-    final entry = await _database.getMyListEntry(animeUrl);
+    final entry = await _database.getMyListEntry(contentUrl);
     if (entry == null) return;
 
     final safeWatched =
@@ -300,13 +300,13 @@ class WatchHistory {
     if (safeWatched > 0 && newStatus == 'planeado') {
       newStatus = 'en_proceso';
     }
-    if (animeIsFinished && totalEpisodes > 0 && safeWatched >= totalEpisodes) {
+    if (contentIsFinished && totalEpisodes > 0 && safeWatched >= totalEpisodes) {
       newStatus = 'completado';
     }
 
     await _database.upsertMyListEntry(
       MyListEntriesCompanion.insert(
-        animeUrl: entry.animeUrl,
+        contentUrl: entry.contentUrl,
         titulo: entry.titulo,
         imagen: Value(entry.imagen),
         status: newStatus,
@@ -336,7 +336,7 @@ class WatchHistory {
       'myList': [
         for (final r in myListRows)
           {
-            'animeUrl': r.animeUrl,
+            'animeUrl': r.contentUrl,
             'titulo': r.titulo,
             'imagen': r.imagen,
             'status': r.status,
@@ -405,7 +405,7 @@ class WatchHistory {
           (remote['myList'] as List?)?.cast<Map<String, dynamic>>() ?? const [];
       for (final r in myList) {
         await db.mergeApplyMyList(
-          animeUrl: (r['animeUrl'] ?? '').toString(),
+          contentUrl: (r['animeUrl'] ?? '').toString(),
           titulo: (r['titulo'] ?? '').toString(),
           imagen: (r['imagen'] ?? '').toString(),
           status: (r['status'] ?? 'planeado').toString(),

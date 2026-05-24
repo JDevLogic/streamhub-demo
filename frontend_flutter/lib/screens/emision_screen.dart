@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../theme.dart';
 import '../widgets/resilient_cached_image.dart';
 import '../widgets/search_button.dart';
 import '../widgets/states.dart';
-import 'anime_detail_screen.dart';
+import 'detail_screen.dart';
 
 class EmisionScreen extends ConsumerWidget {
   const EmisionScreen({super.key});
 
-  void _openAnime(BuildContext context, String titulo, String url,
+  void _openContent(BuildContext context, String titulo, String url,
       String imagen, WidgetRef ref) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AnimeDetailScreen(
-          animeTitle: titulo,
-          animeUrl: url,
-          animeImage: imagen,
+        builder: (_) => DetailScreen(
+          contentTitle: titulo,
+          contentUrl: url,
+          contentImage: imagen,
         ),
       ),
     );
@@ -47,7 +47,7 @@ class EmisionScreen extends ConsumerWidget {
                 color: VoidTheme.textSecondary),
             onPressed: () => ref.invalidate(onAirProvider),
           ),
-          const AnimeSearchButton(),
+          const SearchButton(),
         ],
       ),
       body: emisionAsync.when(
@@ -60,11 +60,11 @@ class EmisionScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(onAirProvider),
           ),
         ),
-        data: (animes) {
-          if (animes.isEmpty) {
+        data: (items) {
+          if (items.isEmpty) {
             return Center(
               child: Text(
-                'No hay animes en emisión disponibles.',
+                'No hay contenido en emisión disponibles.',
                 style: GoogleFonts.sora(color: VoidTheme.textSecondary),
               ),
             );
@@ -86,16 +86,16 @@ class EmisionScreen extends ConsumerWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 24,
               ),
-              itemCount: animes.length,
+              itemCount: items.length,
               itemBuilder: (context, i) {
-                final anime = animes[i];
-                final titulo = (anime['titulo'] ?? '').toString();
-                final imagenHd = (anime['imagen_hd'] ?? '').toString();
+                final item = items[i];
+                final titulo = (item['titulo'] ?? '').toString();
+                final imagenHd = (item['imagen_hd'] ?? '').toString();
                 final imagen = imagenHd.isNotEmpty
                     ? imagenHd
-                    : (anime['imagen'] ?? '').toString();
-                final url = (anime['url'] ?? '').toString();
-                final tipo = (anime['tipo'] ?? '').toString();
+                    : (item['imagen'] ?? '').toString();
+                final url = (item['url'] ?? '').toString();
+                final tipo = (item['tipo'] ?? '').toString();
 
                 return _EmisionGridItem(
                   titulo: titulo,
@@ -103,7 +103,7 @@ class EmisionScreen extends ConsumerWidget {
                   url: url,
                   tipo: tipo,
                   onTap: (resolvedImage) =>
-                      _openAnime(context, titulo, url, resolvedImage, ref),
+                      _openContent(context, titulo, url, resolvedImage, ref),
                 );
               },
             ),

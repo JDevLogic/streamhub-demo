@@ -8,7 +8,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../services/content_service.dart';
 import '../services/auto_resolve.dart';
 import '../services/watch_history.dart';
@@ -19,30 +19,30 @@ import '../widgets/skip_intro_button.dart';
 class NativePlayerScreen extends ConsumerStatefulWidget {
   const NativePlayerScreen({
     super.key,
-    required this.animeTitle,
+    required this.contentTitle,
     required this.episodeName,
     required this.videoUrl,
     required this.serverName,
     this.serverEnlace = '',
     this.episodeUrl = '',
-    this.animeUrl = '',
-    this.animeImage = '',
-    this.animeStatus = '',
+    this.contentUrl = '',
+    this.contentImage = '',
+    this.contentStatus = '',
     this.qualities = const [],
     this.episodios = const [],
     this.currentEpisodeIndex = 0,
     this.onSwitchToWebView,
   });
 
-  final String animeTitle;
+  final String contentTitle;
   final String episodeName;
   final String videoUrl;
   final String serverName;
   final String serverEnlace;
   final String episodeUrl;
-  final String animeUrl;
-  final String animeImage;
-  final String animeStatus;
+  final String contentUrl;
+  final String contentImage;
+  final String contentStatus;
   final List<Map<String, dynamic>> qualities;
   final List<Map<String, dynamic>> episodios;
   final int currentEpisodeIndex;
@@ -100,8 +100,8 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
   bool _changingEpisode = false;
   bool _isDraggingSlider = false;
   bool _markedWatched = false; // true once episode is marked watched (≥90%)
-  bool get _animeIsFinished =>
-      widget.animeStatus.toLowerCase().contains('finaliz');
+  bool get _contentIsFinished =>
+      widget.contentStatus.toLowerCase().contains('finaliz');
 
   Timer? _hideTimer;
   Timer? _progressTimer;
@@ -214,8 +214,8 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
           _markedWatched = true;
           WatchHistory.markEpisodeWatched(_episodeUrl);
           WatchHistory.handleEpisodeFinished(
-            widget.animeUrl,
-            animeIsFinished: _animeIsFinished,
+            widget.contentUrl,
+            contentIsFinished: _contentIsFinished,
           );
           WatchHistory.clearEpisodeProgress(_episodeUrl);
         }
@@ -241,7 +241,7 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
         _bestServerRecorded = true;
         if (widget.serverEnlace.isNotEmpty && widget.episodeUrl.isNotEmpty) {
           unawaited(saveBestServer(widget.episodeUrl, widget.serverEnlace));
-          setAnimePreferredServer(widget.animeUrl, widget.serverName);
+          setPreferredServer(widget.contentUrl, widget.serverName);
         }
       }
     });
@@ -679,9 +679,9 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
     final hit = _prefetch.remove(epUrl);
     if (hit != null && hit.url.isNotEmpty) {
       WatchHistory.add(
-        titulo: widget.animeTitle,
-        url: widget.animeUrl,
-        imagen: widget.animeImage,
+        titulo: widget.contentTitle,
+        url: widget.contentUrl,
+        imagen: widget.contentImage,
         lastEpisodeUrl: epUrl,
         lastEpisodeName: epName,
         lastKnownEpisodeCount: widget.episodios.length,
@@ -712,9 +712,9 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
       final servidores = await service.getSources(epUrl);
 
       WatchHistory.add(
-        titulo: widget.animeTitle,
-        url: widget.animeUrl,
-        imagen: widget.animeImage,
+        titulo: widget.contentTitle,
+        url: widget.contentUrl,
+        imagen: widget.contentImage,
         lastEpisodeUrl: epUrl,
         lastEpisodeName: epName,
         lastKnownEpisodeCount: widget.episodios.length,

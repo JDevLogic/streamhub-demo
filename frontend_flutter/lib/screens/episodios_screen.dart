@@ -7,7 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../providers/appearance_provider.dart';
 import '../services/content_service.dart';
 import '../services/auto_resolve.dart';
@@ -36,16 +36,16 @@ const _kEpGridTileExtent = 68.0; // square tile (~58) + bottom margin (10)
 class EpisodiosScreen extends ConsumerStatefulWidget {
   const EpisodiosScreen({
     super.key,
-    required this.animeTitle,
-    required this.animeUrl,
-    this.animeImage = '',
-    this.animeStatus = '',
+    required this.contentTitle,
+    required this.contentUrl,
+    this.contentImage = '',
+    this.contentStatus = '',
   });
 
-  final String animeTitle;
-  final String animeUrl;
-  final String animeImage;
-  final String animeStatus;
+  final String contentTitle;
+  final String contentUrl;
+  final String contentImage;
+  final String contentStatus;
 
   @override
   ConsumerState<EpisodiosScreen> createState() => _EpisodiosScreenState();
@@ -138,8 +138,8 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
   _EpFilter _filter = _EpFilter.all;
   int _activeRangeIdx = 0;
 
-  bool get _animeIsFinished =>
-      widget.animeStatus.toLowerCase().contains('finaliz');
+  bool get _contentIsFinished =>
+      widget.contentStatus.toLowerCase().contains('finaliz');
 
   Future<void> _syncMyListProgressFromWatched() async {
     if (_episodios.isEmpty) return;
@@ -149,10 +149,10 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
         .toSet();
     final watchedCount = _watchedUrls.where(episodeUrls.contains).length;
     await WatchHistory.syncMyListEpisodeCount(
-      animeUrl: widget.animeUrl,
+      contentUrl: widget.contentUrl,
       watchedCount: watchedCount,
       totalEpisodes: _episodios.length,
-      animeIsFinished: _animeIsFinished,
+      contentIsFinished: _contentIsFinished,
     );
   }
 
@@ -160,7 +160,7 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
   void initState() {
     super.initState();
     final service = ref.read(contentServiceProvider);
-    _futureEpisodios = service.getEpisodes(widget.animeUrl).then((eps) {
+    _futureEpisodios = service.getEpisodes(widget.contentUrl).then((eps) {
       _episodios = eps;
       _preloadServers(eps, service);
       _resolveInitialViewMode();
@@ -317,7 +317,7 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
   Future<void> _loadWatched() async {
     final results = await Future.wait([
       WatchHistory.getWatchedEpisodes(),
-      WatchHistory.getLastEpisodeUrl(widget.animeUrl),
+      WatchHistory.getLastEpisodeUrl(widget.contentUrl),
       WatchHistory.getAllProgress(),
     ]);
     if (!mounted) return;
@@ -365,10 +365,10 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
     await autoResolveAndPlay(
       context,
       service: ref.read(contentServiceProvider),
-      animeTitle: widget.animeTitle,
-      animeUrl: widget.animeUrl,
-      animeImage: widget.animeImage,
-      animeStatus: widget.animeStatus,
+      contentTitle: widget.contentTitle,
+      contentUrl: widget.contentUrl,
+      contentImage: widget.contentImage,
+      contentStatus: widget.contentStatus,
       episodioUrl: episodioUrl,
       episodioNombre: episodioNombre,
       episodios: _episodios,
@@ -384,7 +384,7 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
-        title: Text(widget.animeTitle,
+        title: Text(widget.contentTitle,
             style: GoogleFonts.sora(
               fontWeight: FontWeight.w700,
               fontSize: 16,
@@ -408,7 +408,7 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
               onRetry: () => setState(
                 () => _futureEpisodios = ref
                     .read(contentServiceProvider)
-                    .getEpisodes(widget.animeUrl),
+                    .getEpisodes(widget.contentUrl),
               ),
             );
           }
@@ -960,8 +960,8 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
       unawaited(WatchHistory.markEpisodeWatched(epUrl));
       unawaited(
         WatchHistory.handleEpisodeFinished(
-          widget.animeUrl,
-          animeIsFinished: _animeIsFinished,
+          widget.contentUrl,
+          contentIsFinished: _contentIsFinished,
         ),
       );
     }
@@ -977,20 +977,20 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({
     super.key,
-    required this.animeTitle,
-    required this.animeUrl,
-    this.animeImage = '',
-    this.animeStatus = '',
+    required this.contentTitle,
+    required this.contentUrl,
+    this.contentImage = '',
+    this.contentStatus = '',
     required this.episodios,
     required this.initialEpisodeIndex,
     required this.servidores,
     required this.initialServerIndex,
   });
 
-  final String animeTitle;
-  final String animeUrl;
-  final String animeImage;
-  final String animeStatus;
+  final String contentTitle;
+  final String contentUrl;
+  final String contentImage;
+  final String contentStatus;
   final List<Map<String, dynamic>> episodios;
   final int initialEpisodeIndex;
   final List<Map<String, dynamic>> servidores;
@@ -1049,8 +1049,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   final Set<String> _allowed = {};
 
-  bool get _animeIsFinished =>
-      widget.animeStatus.toLowerCase().contains('finaliz');
+  bool get _contentIsFinished =>
+      widget.contentStatus.toLowerCase().contains('finaliz');
 
   // -----------------------------------------------------------------------
   // Ad patterns – bloqueo a nivel de red
@@ -1379,7 +1379,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       final enlace = _vidUrl;
       if (enlace.isNotEmpty) {
         unawaited(saveBestServer(_episodeUrl, enlace));
-        setAnimePreferredServer(widget.animeUrl, _srvName);
+        setPreferredServer(widget.contentUrl, _srvName);
       }
     }
 
@@ -1417,8 +1417,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _markedWatched = true;
     await WatchHistory.markEpisodeWatched(episodeUrl);
     await WatchHistory.handleEpisodeFinished(
-      widget.animeUrl,
-      animeIsFinished: _animeIsFinished,
+      widget.contentUrl,
+      contentIsFinished: _contentIsFinished,
     );
     await WatchHistory.clearEpisodeProgress(episodeUrl);
   }
@@ -2548,18 +2548,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       final url = (widget.episodios[n]['url'] ?? '').toString();
       final epName = (widget.episodios[n]['episodio'] ?? 'Episodio').toString();
       await WatchHistory.add(
-        titulo: widget.animeTitle,
-        url: widget.animeUrl,
-        imagen: widget.animeImage,
+        titulo: widget.contentTitle,
+        url: widget.contentUrl,
+        imagen: widget.contentImage,
         lastEpisodeUrl: url,
         lastEpisodeName: epName,
         lastKnownEpisodeCount: widget.episodios.length,
-        estado: widget.animeStatus,
+        estado: widget.contentStatus,
       );
       final s = await ref.read(contentServiceProvider).getSources(url);
       final sorted = ContentService.sortServersByPriority(s);
       final ordered =
-          await applyPreferredServerOrder(sorted, url, widget.animeUrl);
+          await applyPreferredServerOrder(sorted, url, widget.contentUrl);
       setState(() {
         _servers = ordered;
         _srvIdx = 0;
@@ -2859,7 +2859,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(widget.animeTitle,
+                  Text(widget.contentTitle,
                       style:
                           GoogleFonts.sora(color: Colors.white54, fontSize: 11),
                       maxLines: 1,

@@ -37,7 +37,7 @@ class AjustesScreen extends ConsumerWidget {
                     ),
                   ),
                   const Spacer(),
-                  const AnimeSearchButton(margin: EdgeInsets.zero),
+                  const SearchButton(margin: EdgeInsets.zero),
                 ],
               ),
               const SizedBox(height: 28),

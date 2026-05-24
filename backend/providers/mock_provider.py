@@ -24,45 +24,45 @@ _BANNER = {
     "eternal-bloom":    "https://picsum.photos/seed/bloom-b/800/400",
 }
 
-_ANIMES: list[dict[str, Any]] = [
+_CATALOG: list[dict[str, Any]] = [
     {
         "titulo": "Demo Adventure",
-        "url": "demo://anime/demo-adventure",
+        "url": "demo://content/demo-adventure",
         "imagen": _IMG["demo-adventure"],
         "tipo": "TV",
         "estado": "En emisión",
     },
     {
         "titulo": "Sample Future",
-        "url": "demo://anime/sample-future",
+        "url": "demo://content/sample-future",
         "imagen": _IMG["sample-future"],
         "tipo": "TV",
         "estado": "Finalizado",
     },
     {
         "titulo": "Void Chronicles",
-        "url": "demo://anime/void-chronicles",
+        "url": "demo://content/void-chronicles",
         "imagen": _IMG["void-chronicles"],
         "tipo": "TV",
         "estado": "En emisión",
     },
     {
         "titulo": "Neon Spirits",
-        "url": "demo://anime/neon-spirits",
+        "url": "demo://content/neon-spirits",
         "imagen": _IMG["neon-spirits"],
         "tipo": "TV",
         "estado": "Finalizado",
     },
     {
         "titulo": "Crimson Protocol",
-        "url": "demo://anime/crimson-protocol",
+        "url": "demo://content/crimson-protocol",
         "imagen": _IMG["crimson-protocol"],
         "tipo": "TV",
         "estado": "Finalizado",
     },
     {
         "titulo": "Eternal Bloom",
-        "url": "demo://anime/eternal-bloom",
+        "url": "demo://content/eternal-bloom",
         "imagen": _IMG["eternal-bloom"],
         "tipo": "OVA",
         "estado": "En emisión",
@@ -70,7 +70,7 @@ _ANIMES: list[dict[str, Any]] = [
 ]
 
 _DETAILS: dict[str, dict[str, Any]] = {
-    "demo://anime/demo-adventure": {
+    "demo://content/demo-adventure": {
         "titulo": "Demo Adventure",
         "imagen": _IMG["demo-adventure"],
         "imagen_hd": _IMG["demo-adventure"],
@@ -90,13 +90,13 @@ _DETAILS: dict[str, dict[str, Any]] = {
         "relaciones": [
             {
                 "titulo": "Void Chronicles",
-                "url": "demo://anime/void-chronicles",
+                "url": "demo://content/void-chronicles",
                 "relacion": "Secuela",
                 "imagen": _IMG["void-chronicles"],
             },
         ],
     },
-    "demo://anime/sample-future": {
+    "demo://content/sample-future": {
         "titulo": "Sample Future",
         "imagen": _IMG["sample-future"],
         "imagen_hd": _IMG["sample-future"],
@@ -115,7 +115,7 @@ _DETAILS: dict[str, dict[str, Any]] = {
         "proximo": "",
         "relaciones": [],
     },
-    "demo://anime/void-chronicles": {
+    "demo://content/void-chronicles": {
         "titulo": "Void Chronicles",
         "imagen": _IMG["void-chronicles"],
         "imagen_hd": _IMG["void-chronicles"],
@@ -135,13 +135,13 @@ _DETAILS: dict[str, dict[str, Any]] = {
         "relaciones": [
             {
                 "titulo": "Demo Adventure",
-                "url": "demo://anime/demo-adventure",
+                "url": "demo://content/demo-adventure",
                 "relacion": "Precuela",
                 "imagen": _IMG["demo-adventure"],
             },
         ],
     },
-    "demo://anime/neon-spirits": {
+    "demo://content/neon-spirits": {
         "titulo": "Neon Spirits",
         "imagen": _IMG["neon-spirits"],
         "imagen_hd": _IMG["neon-spirits"],
@@ -160,7 +160,7 @@ _DETAILS: dict[str, dict[str, Any]] = {
         "proximo": "",
         "relaciones": [],
     },
-    "demo://anime/crimson-protocol": {
+    "demo://content/crimson-protocol": {
         "titulo": "Crimson Protocol",
         "imagen": _IMG["crimson-protocol"],
         "imagen_hd": _IMG["crimson-protocol"],
@@ -180,7 +180,7 @@ _DETAILS: dict[str, dict[str, Any]] = {
         "proximo": "",
         "relaciones": [],
     },
-    "demo://anime/eternal-bloom": {
+    "demo://content/eternal-bloom": {
         "titulo": "Eternal Bloom",
         "imagen": _IMG["eternal-bloom"],
         "imagen_hd": _IMG["eternal-bloom"],
@@ -213,34 +213,34 @@ class MockProvider:
     """Proveedor de datos seguro para la versión pública demo."""
 
     def get_catalog(self) -> list[dict[str, Any]]:
-        return list(_ANIMES)
+        return list(_CATALOG)
 
     def get_latest_episodes(self) -> list[dict[str, Any]]:
         return list(_ULTIMOS)
 
     def get_on_air(self) -> list[dict[str, Any]]:
-        return [a for a in _ANIMES if a["estado"] == "En emisión"]
+        return [a for a in _CATALOG if a["estado"] == "En emisión"]
 
     def search(self, q: str) -> list[dict[str, Any]]:
         query = q.lower().strip()
-        return [a for a in _ANIMES if query in a["titulo"].lower()]
+        return [a for a in _CATALOG if query in a["titulo"].lower()]
 
     def get_by_genre(self, genero: str) -> list[dict[str, Any]]:
         g = genero.lower()
         result = []
-        for anime in _ANIMES:
-            detail = _DETAILS.get(anime["url"], {})
+        for item in _CATALOG:
+            detail = _DETAILS.get(item["url"], {})
             all_tags = [t.lower() for t in detail.get("generos", []) + detail.get("tags", [])]
             if any(g in tag for tag in all_tags):
-                result.append(anime)
-        return result or list(_ANIMES)
+                result.append(item)
+        return result or list(_CATALOG)
 
     def get_detail(self, url: str) -> dict[str, Any]:
         detail = _DETAILS.get(url)
         if detail:
             return {**detail, "url": url}
         return {
-            "titulo": "Demo Anime",
+            "titulo": "Demo Content",
             "url": url,
             "imagen": "https://picsum.photos/seed/default/400/560",
             "imagen_hd": "https://picsum.photos/seed/default/400/560",

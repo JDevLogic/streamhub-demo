@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../theme.dart';
 import '../widgets/animations.dart';
 import '../widgets/resilient_cached_image.dart';
 import '../widgets/states.dart'
     show AppErrorState, AppEmptyState, ShimmerBox, ShimmerGrid, TappableScale;
-import 'anime_detail_screen.dart';
+import 'detail_screen.dart';
 
 const _kImageHeaders = {
   'Referer': 'https://demo.local/',
@@ -19,12 +19,12 @@ const _kImageHeaders = {
       ' (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
 };
 
-String _normalizeAnimeUrl(String raw) {
+String _normalizeContentUrl(String raw) {
   final url = raw.trim();
   if (url.isEmpty) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/')) return 'demo://anime$url';
-  return 'demo://anime/$url';
+  if (url.startsWith('/')) return 'demo://content$url';
+  return 'demo://content/$url';
 }
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -159,7 +159,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             autofocus: true,
             style: GoogleFonts.sora(color: VoidTheme.text, fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Buscar anime...',
+              hintText: 'Buscar...',
               hintStyle:
                   GoogleFonts.sora(color: VoidTheme.textMuted, fontSize: 14),
               border: InputBorder.none,
@@ -219,7 +219,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Icon(Icons.search_rounded,
                 color: VoidTheme.textMuted.withOpacity(0.5), size: 64),
             const SizedBox(height: 16),
-            Text('Busca cualquier anime',
+            Text('Busca cualquier título',
                 style:
                     GoogleFonts.sora(color: VoidTheme.textMuted, fontSize: 15)),
           ],
@@ -342,18 +342,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               childAspectRatio: 0.52,
             ),
             itemBuilder: (context, index) {
-              final anime = results[index];
-              final titulo = (anime['titulo'] ?? '').toString();
-              final imagenHd = (anime['imagen_hd'] ?? '').toString();
+              final item = results[index];
+              final titulo = (item['titulo'] ?? '').toString();
+              final imagenHd = (item['imagen_hd'] ?? '').toString();
               final imagen = imagenHd.isNotEmpty
                   ? imagenHd
-                  : (anime['imagen'] ?? '').toString();
-              final tipo = (anime['tipo'] ?? '').toString();
-              final url = (anime['url'] ?? '').toString();
+                  : (item['imagen'] ?? '').toString();
+              final tipo = (item['tipo'] ?? '').toString();
+              final url = (item['url'] ?? '').toString();
 
               return FadeInEntrance(
                 delay: Duration(milliseconds: (index % 12) * 40),
-                child: _SearchAnimeTile(
+                child: _SearchTile(
                   title: titulo,
                   image: imagen,
                   type: tipo,
@@ -481,8 +481,8 @@ class _SearchDirectTile extends StatelessWidget {
   }
 }
 
-class _SearchAnimeTile extends ConsumerWidget {
-  const _SearchAnimeTile({
+class _SearchTile extends ConsumerWidget {
+  const _SearchTile({
     required this.title,
     required this.image,
     required this.type,
@@ -496,7 +496,7 @@ class _SearchAnimeTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final normalizedUrl = _normalizeAnimeUrl(url);
+    final normalizedUrl = _normalizeContentUrl(url);
     final needsFallback = image.isEmpty && url.isNotEmpty;
     final detailAsync =
         needsFallback ? ref.watch(detailProvider(normalizedUrl)) : null;
@@ -517,10 +517,10 @@ class _SearchAnimeTile extends ConsumerWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => AnimeDetailScreen(
-            animeTitle: title,
-            animeUrl: normalizedUrl,
-            animeImage: finalImage,
+          builder: (_) => DetailScreen(
+            contentTitle: title,
+            contentUrl: normalizedUrl,
+            contentImage: finalImage,
           ),
         ),
       ),
@@ -529,7 +529,7 @@ class _SearchAnimeTile extends ConsumerWidget {
         children: [
           Expanded(
             child: Hero(
-              tag: 'anime-cover-$url',
+              tag: 'cover-$url',
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),

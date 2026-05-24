@@ -30,15 +30,15 @@ setInterval(() => {
 }, 1000);
 const introExpandedGroups = new Set();
 let introSearchTerm = '';
-let introSortMode = 'anime_asc';
+let introSortMode = 'title_asc';
 let introAllCollapsed = false;
 let introUserInteracted = false;
 /** @type {Record<string, { durationSec: number, updated_at: number }>} */
-let introDurationByAnime = {};
+let introDurationByContent = {};
 let siEndManuallyEdited = false;
 let _introEndProgrammatic = false;
 /** Si false (ej. Editar), no recalcula el fin al cambiar el inicio */
-let introSuggestEndFromAnime = true;
+let introSuggestEndFromContent = true;
 
 /* ── Time helpers ────────────────────────── */
 function secsToMmss(secs) {
@@ -69,12 +69,12 @@ function buildAutoLabelFromUrl(rawUrl) {
 
   const epMatch = slug.match(/^(.*?)-(\d+)(?:-[a-z0-9]+)?$/i);
   if (!epMatch) return slug;
-  const animeSlug = (epMatch[1] || '').replace(/-+$/g, '');
-  const animeName = animeSlug.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  const animeTitle = animeName.replace(/\b\w/g, c => c.toUpperCase());
+  const contentSlug = (epMatch[1] || '').replace(/-+$/g, '');
+  const contentName = contentSlug.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  const contentTitle = contentName.replace(/\b\w/g, c => c.toUpperCase());
   const epNum = epMatch[2];
-  if (!animeTitle || !epNum) return slug;
-  return `${animeTitle}-EP${epNum}`;
+  if (!contentTitle || !epNum) return slug;
+  return `${contentTitle}-EP${epNum}`;
 }
 
 function autoFillLabelFromUrl(force=false) {
@@ -92,11 +92,11 @@ function introSortKey(row) {
   const match = base.match(/^(.*?)-EP(\d+)$/i);
   if (match) {
     return {
-      anime: match[1].trim().toLowerCase(),
+      content: match[1].trim().toLowerCase(),
       ep: parseInt(match[2], 10) || 0
     };
   }
-  return { anime: base.toLowerCase(), ep: 0 };
+  return { content: base.toLowerCase(), ep: 0 };
 }
 
 function introGroupMeta(row) {
@@ -107,14 +107,14 @@ function introGroupMeta(row) {
   const match = base.match(/^(.*?)-EP(\d+)$/i);
   if (match) {
     return {
-      animeDisplay: match[1].trim(),
-      animeKey: match[1].trim().toLowerCase(),
+      contentDisplay: match[1].trim(),
+      contentKey: match[1].trim().toLowerCase(),
       ep: parseInt(match[2], 10) || 0,
     };
   }
   return {
-    animeDisplay: base,
-    animeKey: base.toLowerCase(),
+    contentDisplay: base,
+    contentKey: base.toLowerCase(),
     ep: 0,
   };
 }
@@ -137,13 +137,13 @@ function introDurationHintKeySetForUrlLabel(url, label) {
   const keys = new Set();
   const add = (k) => { if (k) keys.add(k); };
   add(introSlugPrefixKeyFromUrl(u));
-  add(introGroupMeta({ episodio_url: u, label: '' }).animeKey);
-  add(introGroupMeta({ episodio_url: u, label: lb }).animeKey);
+  add(introGroupMeta({ episodio_url: u, label: '' }).contentKey);
+  add(introGroupMeta({ episodio_url: u, label: lb }).contentKey);
   return keys;
 }
 
 function rebuildIntroDurationHints(rows) {
-  introDurationByAnime = {};
+  introDurationByContent = {};
   for (const r of rows || []) {
     if (r.no_intro === 1 || r.no_intro === true) continue;
     const start = Number(r.intro_start) || 0;
@@ -155,18 +155,18 @@ function rebuildIntroDurationHints(rows) {
     const label = (r.label || '').trim();
     const keySet = introDurationHintKeySetForUrlLabel(url, label);
     for (const key of keySet) {
-      const prev = introDurationByAnime[key];
+      const prev = introDurationByContent[key];
       if (!prev || ts >= prev.updated_at) {
-        introDurationByAnime[key] = { durationSec: dur, updated_at: ts };
+        introDurationByContent[key] = { durationSec: dur, updated_at: ts };
       }
     }
   }
 }
 
-function introAnimeKeyFromForm() {
+function introContentKeyFromForm() {
   const url = document.getElementById('si-url')?.value?.trim() || '';
   const label = document.getElementById('si-label')?.value?.trim() || '';
-  return introGroupMeta({ episodio_url: url, label }).animeKey;
+  return introGroupMeta({ episodio_url: url, label }).contentKey;
 }
 
 function getIntroDurationHintForForm() {
@@ -174,7 +174,7 @@ function getIntroDurationHintForForm() {
   const label = document.getElementById('si-label')?.value?.trim() || '';
   let best = null;
   for (const key of introDurationHintKeySetForUrlLabel(url, label)) {
-    const h = introDurationByAnime[key];
+    const h = introDurationByContent[key];
     if (!h || h.durationSec <= 0) continue;
     if (!best || h.updated_at >= best.updated_at) best = h;
   }
@@ -186,7 +186,7 @@ function refreshIntroFormDurationHint() {
   if (!el) return;
   const hint = getIntroDurationHintForForm();
   if (hint && hint.durationSec > 0) {
-    el.textContent = 'Duracion guardada para este anime: ' + hint.durationSec + 's (fin = inicio + ' + hint.durationSec + 's). Ajusta el fin a mano si este episodio es distinto.';
+    el.textContent = 'Duracion guardada para este contenido: ' + hint.durationSec + 's (fin = inicio + ' + hint.durationSec + 's). Ajusta el fin a mano si este episodio es distinto.';
   } else {
     el.textContent = '';
   }
@@ -199,7 +199,7 @@ function applyIntroEndFromHint(secs) {
 }
 
 function maybeAutofillIntroEnd() {
-  if (!introSuggestEndFromAnime) return;
+  if (!introSuggestEndFromContent) return;
   const hint = getIntroDurationHintForForm();
   if (!hint || hint.durationSec <= 0) return;
   const start = parseTime(document.getElementById('si-start')?.value || '');
@@ -233,7 +233,7 @@ function setIntroSearch(value) {
 }
 
 function setIntroSort(value) {
-  introSortMode = value || 'anime_asc';
+  introSortMode = value || 'title_asc';
   loadIntros();
 }
 
@@ -532,7 +532,7 @@ async function loadPending() {
 }
 
 function prefillIntro(url, startSecs=0, endSecs=85) {
-  introSuggestEndFromAnime = true;
+  introSuggestEndFromContent = true;
   siEndManuallyEdited = false;
   document.getElementById('si-url').value   = url;
   document.getElementById('si-label').value = buildAutoLabelFromUrl(url);
@@ -549,7 +549,7 @@ function prefillIntro(url, startSecs=0, endSecs=85) {
 }
 
 function editIntro(url, label, startSecs, endSecs) {
-  introSuggestEndFromAnime = false;
+  introSuggestEndFromContent = false;
   siEndManuallyEdited = false;
   document.getElementById('si-url').value   = url;
   document.getElementById('si-label').value = label;
@@ -577,7 +577,7 @@ async function loadIntros() {
       const haystack = [
         (r.label || ''),
         (r.episodio_url || ''),
-        meta.animeDisplay,
+        meta.contentDisplay,
         `ep${meta.ep}`,
         (r.no_intro === 1 || r.no_intro === true) ? 'sin intro' : ''
       ].join(' ').toLowerCase();
@@ -590,15 +590,15 @@ async function loadIntros() {
     const groups = new Map();
     for (const r of data) {
       const meta = introGroupMeta(r);
-      if (!groups.has(meta.animeKey)) {
-        groups.set(meta.animeKey, { animeDisplay: meta.animeDisplay, items: [] });
+      if (!groups.has(meta.contentKey)) {
+        groups.set(meta.contentKey, { contentDisplay: meta.contentDisplay, items: [] });
       }
-      groups.get(meta.animeKey).items.push(r);
+      groups.get(meta.contentKey).items.push(r);
     }
 
     const orderedGroups = [...groups.entries()].sort((a, b) => {
-      const byName = a[1].animeDisplay.localeCompare(b[1].animeDisplay, 'es');
-      if (introSortMode === 'anime_desc') return -byName;
+      const byName = a[1].contentDisplay.localeCompare(b[1].contentDisplay, 'es');
+      if (introSortMode === 'title_desc') return -byName;
       if (introSortMode === 'updated_desc') {
         const maxA = Math.max(...a[1].items.map(i => i.updated_at || 0));
         const maxB = Math.max(...b[1].items.map(i => i.updated_at || 0));
@@ -619,7 +619,7 @@ async function loadIntros() {
         <td colspan="5">
           <button class="group-toggle" data-intro-toggle="${groupKey}">
             <span class="group-caret">▶</span>
-            <span class="group-name">${group.animeDisplay}</span>
+            <span class="group-name">${group.contentDisplay}</span>
             <span class="group-count">(${group.items.length} episodios)</span>
           </button>
         </td>`;
@@ -679,7 +679,7 @@ async function saveIntro() {
     toast('Guardado  ' + secsToMmss(start) + ' -> ' + secsToMmss(end));
     document.getElementById('si-url').value   = '';
     document.getElementById('si-label').value = '';
-    introSuggestEndFromAnime = true;
+    introSuggestEndFromContent = true;
     siEndManuallyEdited = false;
     setTimeInput('si-start', 0);
     setTimeInput('si-end', 85);
@@ -703,7 +703,7 @@ async function saveIntroNoIntro() {
     toast('Guardado sin intro');
     document.getElementById('si-url').value   = '';
     document.getElementById('si-label').value = '';
-    introSuggestEndFromAnime = true;
+    introSuggestEndFromContent = true;
     siEndManuallyEdited = false;
     setTimeInput('si-start', 0);
     setTimeInput('si-end', 85);
@@ -1216,7 +1216,7 @@ document.getElementById('si-end')  ?.addEventListener('input', () => {
   updatePreview('si-end');
 });
 document.getElementById('si-url')  ?.addEventListener('input', () => {
-  introSuggestEndFromAnime = true;
+  introSuggestEndFromContent = true;
   siEndManuallyEdited = false;
   autoFillLabelFromUrl(false);
   refreshIntroFormDurationHint();
@@ -1229,13 +1229,13 @@ document.getElementById('si-label')?.addEventListener('input', () => {
 document.getElementById('intro-body')?.addEventListener('click', onIntroBodyClick);
 
 // Initialize
-introSuggestEndFromAnime = true;
+introSuggestEndFromContent = true;
 siEndManuallyEdited = false;
 setTimeInput('si-start', 0);
 setTimeInput('si-end', 85);
 
 /* ── Debug Console ─────────────────────── */
-let _dbgSelectedAnime = null;
+let _dbgSelectedContent = null;
 let _dbgSelectedEp = null;
 
 function _dbgStatus(id, html) { document.getElementById(id).innerHTML = html; }
@@ -1273,7 +1273,7 @@ async function debugSearch() {
       const url = a.url || a.enlace || '';
       const cover = a.imagen || a.cover || a.poster || '';
       const tipo = a.tipo || a.type || '';
-      html += `<div class="dbg-anime-row" onclick="debugSelectAnime(this)" data-url="${url.replace(/"/g,'&quot;')}" data-title="${title.replace(/"/g,'&quot;')}">`;
+      html += `<div class="dbg-content-row" onclick="debugSelectContent(this)" data-url="${url.replace(/"/g,'&quot;')}" data-title="${title.replace(/"/g,'&quot;')}">`;
       if (cover) html += `<img src="${cover}" alt="" loading="lazy" onerror="this.style.display='none'"/>`;
       html += `<div class="dbg-info"><div class="dbg-title">${title}</div>`;
       if (tipo) html += `<div class="dbg-meta">${tipo}</div>`;
@@ -1286,20 +1286,20 @@ async function debugSearch() {
   btn.disabled = false;
 }
 
-async function debugSelectAnime(el) {
+async function debugSelectContent(el) {
   const url = el.dataset.url;
   const title = el.dataset.title;
   if (!url) return;
-  _dbgSelectedAnime = { url, title };
+  _dbgSelectedContent = { url, title };
   // Highlight selected
-  document.querySelectorAll('.dbg-anime-row').forEach(r => r.style.borderColor = 'transparent');
+  document.querySelectorAll('.dbg-content-row').forEach(r => r.style.borderColor = 'transparent');
   el.style.borderColor = 'var(--cyan)';
   // Show episodes section, hide downstream
   const epSec = document.getElementById('dbg-episodes-section');
   epSec.style.display = 'block';
   document.getElementById('dbg-servers-section').style.display = 'none';
   document.getElementById('dbg-resolve-section').style.display = 'none';
-  document.getElementById('dbg-ep-anime').textContent = '— ' + title;
+  document.getElementById('dbg-ep-content').textContent = '— ' + title;
   _dbgStatus('dbg-ep-status', _dbgSpinner('Cargando episodios...'));
   document.getElementById('dbg-ep-list').innerHTML = '';
   epSec.scrollIntoView({ behavior: 'smooth', block: 'start' });

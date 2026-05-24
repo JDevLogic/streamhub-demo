@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart';
+import '../providers/content_providers.dart';
 import '../providers/auth_provider.dart';
 import '../navigation_observer.dart';
 import '../services/auto_resolve.dart';
@@ -17,7 +17,7 @@ import '../widgets/skeletons.dart';
 import '../widgets/home/hero_card.dart';
 import '../widgets/home/section_header.dart';
 import '../widgets/states.dart';
-import 'anime_detail_screen.dart';
+import 'detail_screen.dart';
 import 'search_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -45,14 +45,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   // Continuar Viendo appears without the user having to pull-to-refresh.
   static const _swrRecheckDelay = Duration(seconds: 4);
 
-  String _normalizeAnimeUrl(String raw) {
+  String _normalizeContentUrl(String raw) {
     final value = raw.trim();
     if (value.isEmpty) return '';
     if (value.startsWith('http://') || value.startsWith('https://')) {
     if (value.startsWith('demo://')) return value;
-    if (value.startsWith('/')) return 'demo://anime';
-    return 'demo://anime/';
-    return 'demo://anime/$value';
+    if (value.startsWith('/')) return 'demo://content';
+    return 'demo://content/';
+    return 'demo://content/$value';
   }
 
   @override
@@ -138,12 +138,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               .replaceFirst(RegExp(r'-\d+$'), ''));
         }
       }
-      for (final anime in emision.take(4)) {
-        final url = (anime['url'] ?? '').toString();
+      for (final item in emision.take(4)) {
+        final url = (item['url'] ?? '').toString();
         if (url.isNotEmpty) urls.add(url);
       }
-      for (final anime in agregados.take(6)) {
-        final url = (anime['url'] ?? '').toString();
+      for (final item in agregados.take(6)) {
+        final url = (item['url'] ?? '').toString();
         if (url.isNotEmpty) urls.add(url);
       }
       ref.read(contentServiceProvider).prefetch(urls.toList());
@@ -180,17 +180,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       final batch = vistos.skip(i).take(kBatch).toList();
       final results = await Future.wait(batch.map((entry) async {
         final knownCount = (entry['lastKnownEpisodeCount'] as int?) ?? 0;
-        final animeUrl = (entry['url'] ?? '').toString();
-        if (animeUrl.isEmpty) return entry;
+        final contentUrl = (entry['url'] ?? '').toString();
+        if (contentUrl.isEmpty) return entry;
 
         // Mi Lista is the authoritative source for both the "I'm done" signal
-        // and for the cover image. If Mi Lista has this anime:
+        // cover image: check Mi Lista for this content:
         //   • mark as caught-up when status='completado' or counter maxed out
         //   • override the history-row cover with Mi Lista's cover (which the
         //     user has already confirmed is correct for S1/S2 etc.)
         // This fixes stale wrong covers in Continuar Viendo without requiring
         // a backend re-scrape or a manual history wipe.
-        final myListEntry = myListByUrl[animeUrl];
+        final myListEntry = myListByUrl[contentUrl];
         var preMerged = entry;
         if (myListEntry != null) {
           final status = (myListEntry['status'] ?? '').toString();
@@ -207,7 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
         try {
           final eps =
-              await ref.read(contentServiceProvider).getEpisodes(animeUrl);
+              await ref.read(contentServiceProvider).getEpisodes(contentUrl);
           if (eps.isEmpty) return preMerged;
 
           // Reconcile Mi Lista's totalEpisodes/episodesWatched whenever we
@@ -224,7 +224,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             final watchedCount = watchedUrls.where(epUrls.contains).length;
             if (total != eps.length || prevCount != watchedCount) {
               unawaited(WatchHistory.syncMyListEpisodeCount(
-                animeUrl: animeUrl,
+                contentUrl: contentUrl,
                 watchedCount: watchedCount,
                 totalEpisodes: eps.length,
               ));
@@ -233,14 +233,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
           final lastEpUrl = (entry['lastEpisodeUrl'] ?? '').toString();
 
-          // Recover missing cover image from anime detail when both the
+          // Recover missing cover image from content detail when both the
           // history row and Mi Lista are empty (rare — only for entries
           // that were never added to Mi Lista).
           var merged = preMerged;
           final currentImage = (merged['imagen'] ?? '').toString();
           if (currentImage.isEmpty) {
             try {
-              final detailUrl = _normalizeAnimeUrl(animeUrl);
+              final detailUrl = _normalizeContentUrl(contentUrl);
               final detail = await ref
                   .read(contentServiceProvider)
                   .getDetail(detailUrl);
@@ -333,7 +333,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     final filtered = enriched.where((e) => e['_caughtUp'] != true).toList();
 
-    // PRIORITY: Sort animes with new episodes to the beginning
+    // PRIORITY: Sort content with new episodes to the beginning
     filtered.sort((a, b) {
       final aNew = a['hasNewEpisode'] == true ? 1 : 0;
       final bNew = b['hasNewEpisode'] == true ? 1 : 0;
@@ -377,14 +377,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     ]);
   }
 
-  void _openAnime(String titulo, String url, [String imagen = '']) {
+  void _openContent(String titulo, String url, [String imagen = '']) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AnimeDetailScreen(
-          animeTitle: titulo,
-          animeUrl: url,
-          animeImage: imagen,
+        builder: (_) => DetailScreen(
+          contentTitle: titulo,
+          contentUrl: url,
+          contentImage: imagen,
         ),
       ),
     ).then((_) => _refreshVistos());
@@ -398,13 +398,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     String lastEpisodeName = '',
   }) {
     if (lastEpisodeUrl.isEmpty) {
-      _openAnime(titulo, url, imagen);
+      _openContent(titulo, url, imagen);
       return;
     }
     _autoPlayEpisode(
-      animeTitle: titulo,
-      animeUrl: url,
-      animeImage: imagen,
+      contentTitle: titulo,
+      contentUrl: url,
+      contentImage: imagen,
       episodioUrl: lastEpisodeUrl,
       episodioNombre: lastEpisodeName,
     );
@@ -415,30 +415,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final episodio = (ep['episodio'] ?? '').toString();
     final episodioUrl = (ep['url'] ?? '').toString();
     final imagen = (ep['imagen'] ?? '').toString();
-    final animeUrl = episodioUrl
+    final contentUrl = episodioUrl
         .replaceFirst('/ver/', '/anime/')
         .replaceFirst(RegExp(r'-\d+$'), '');
 
     _autoPlayEpisode(
-      animeTitle: titulo,
-      animeUrl: animeUrl,
-      animeImage: imagen,
+      contentTitle: titulo,
+      contentUrl: contentUrl,
+      contentImage: imagen,
       episodioUrl: episodioUrl,
       episodioNombre: episodio,
     );
   }
 
   Future<void> _autoPlayEpisode({
-    required String animeTitle,
-    required String animeUrl,
-    required String animeImage,
+    required String contentTitle,
+    required String contentUrl,
+    required String contentImage,
     required String episodioUrl,
     required String episodioNombre,
   }) async {
     List<Map<String, dynamic>> episodios = [];
     int episodeIndex = 0;
     try {
-      episodios = await ref.read(contentServiceProvider).getEpisodes(animeUrl);
+      episodios = await ref.read(contentServiceProvider).getEpisodes(contentUrl);
       episodeIndex = episodios.indexWhere(
         (e) => (e['url'] ?? '').toString() == episodioUrl,
       );
@@ -449,9 +449,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     await autoResolveAndPlay(
       context,
       service: ref.read(contentServiceProvider),
-      animeTitle: animeTitle,
-      animeUrl: animeUrl,
-      animeImage: animeImage,
+      contentTitle: contentTitle,
+      contentUrl: contentUrl,
+      contentImage: contentImage,
       episodioUrl: episodioUrl,
       episodioNombre: episodioNombre,
       episodios: episodios,
@@ -590,10 +590,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   async: ref.watch(catalogProvider),
                   onRetry: () => ref.invalidate(catalogProvider),
                   shimmer:
-                      const _ShimmerHorizontalList(child: AnimeCardSkeleton()),
-                  builder: (animes) => HorizontalAnimeRow(
-                    animes: animes,
-                    onTap: _openAnime,
+                      const _ShimmerHorizontalList(child: CardSkeleton()),
+                  builder: (items) => HorizontalContentRow(
+                    items: items,
+                    onTap: _openContent,
                   ),
                 ),
               ),
@@ -674,7 +674,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       children: [
         const HomeSectionHeader(title: 'Continuar Viendo'),
         ContinuarViendoRow(
-          animes: _vistos,
+          items: _vistos,
           onRemove: (url) async {
             await WatchHistory.remove(url);
             _refreshVistos();

@@ -11,12 +11,12 @@ final myListProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return await WatchHistory.getMyList();
 });
 
-// Provider específico para consultar rápidamente el estado individual de un anime.
+// Provider para consultar rápidamente el estado individual de un contenido.
 // Devuelve null si no está en la lista.
-final animeMyListStatusProvider = FutureProvider.family<String?, String>((ref, animeUrl) async {
+final myListStatusProvider = FutureProvider.family<String?, String>((ref, contentUrl) async {
   final auth = ref.watch(authProvider);
   if (!auth.isAuthenticated) {
     return null;
   }
-  return await WatchHistory.getMyListStatus(animeUrl);
+  return await WatchHistory.getMyListStatus(contentUrl);
 });

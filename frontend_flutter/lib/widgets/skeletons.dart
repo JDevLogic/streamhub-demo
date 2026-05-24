@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'states.dart' show ShimmerLoading, SkeletonLeaf;
 
-/// Skeleton for a vertical anime card (used in HorizontalAnimeRow and grid).
-class AnimeCardSkeleton extends StatelessWidget {
-  const AnimeCardSkeleton({super.key});
+/// Skeleton for a vertical content card (used in HorizontalContentRow and grid).
+class CardSkeleton extends StatelessWidget {
+  const CardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +130,7 @@ class ContinueWatchingSkeleton extends StatelessWidget {
   }
 }
 
-/// Skeleton for the top header of AnimeDetailScreen.
+/// Skeleton for the top header of DetailScreen.
 class DetailHeaderSkeleton extends StatelessWidget {
   const DetailHeaderSkeleton({super.key});
 

@@ -21,11 +21,11 @@ void main() async {
     systemNavigationBarColor: VoidTheme.bg,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
-  runApp(const ProviderScope(child: AnimeStreamingApp()));
+  runApp(const ProviderScope(child: StreamHubApp()));
 }
 
-class AnimeStreamingApp extends ConsumerWidget {
-  const AnimeStreamingApp({super.key});
+class StreamHubApp extends ConsumerWidget {
+  const StreamHubApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

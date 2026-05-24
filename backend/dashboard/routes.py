@@ -518,7 +518,7 @@ async def api_intros_pending(_user=Depends(_require_auth)):
 
 
 
-    Scoped to animes present in any synced user's "Mi lista" so the dashboard only
+    Scoped to content present in any synced user's "Mi lista" so the dashboard only
 
     lists content the user actually follows. Falls back to the full set when no
 
@@ -660,7 +660,7 @@ async def api_intros_pending(_user=Depends(_require_auth)):
 
 
 
-    # Group by anime slug and find the highest episode seen per content.
+    # Group by content slug and find the highest episode seen per content.
 
     # Use ALL seen episodes (even those already configured) so predictions persist
 
@@ -1368,7 +1368,7 @@ async def api_user_delete(user_id: int, _user=Depends(_require_auth)):
 
 async def api_debug_search(q: str = "", _user=Depends(_require_auth)):
 
-    """Search anime by name -- returns list with title, url, cover."""
+    """Search content by name -- returns list with title, url, cover."""
 
     if not q.strip():
 
@@ -1392,7 +1392,7 @@ async def api_debug_search(q: str = "", _user=Depends(_require_auth)):
 
 async def api_debug_episodes(url: str = "", _user=Depends(_require_auth)):
 
-    """Get demo episode list for an anime URL."""
+    """Get demo episode list for a content URL."""
 
     if not url.strip():
 

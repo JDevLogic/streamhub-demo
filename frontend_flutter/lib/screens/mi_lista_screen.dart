@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/anime_providers.dart'
+import '../providers/content_providers.dart'
     show contentServiceProvider, miListaTabRefreshProvider;
 import '../providers/auth_provider.dart';
 import '../providers/my_list_provider.dart';
@@ -10,7 +10,7 @@ import '../services/watch_history.dart';
 import '../theme.dart';
 import '../widgets/search_button.dart';
 import '../widgets/states.dart' show TappableScale;
-import 'anime_detail_screen.dart';
+import 'detail_screen.dart';
 
 class MiListaScreen extends ConsumerWidget {
   const MiListaScreen({super.key, required this.isGuest});
@@ -60,7 +60,7 @@ class MiListaScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Inicia sesión para guardar tus animes\nfavoritos y acceder a ellos desde\ncualquier dispositivo.',
+                    'Inicia sesión para guardar tu contenido\nfavorito y acceder a ellos desde\ncualquier dispositivo.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.sora(
                       color: VoidTheme.textSecondary,
@@ -146,7 +146,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
   };
 
   bool _reconciling = false;
-  Map<String, String> _lastEpisodeByAnime = const {};
+  Map<String, String> _lastEpisodeByContent = const {};
 
   @override
   void initState() {
@@ -178,7 +178,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
     final history = await WatchHistory.getAll();
     if (!mounted) return;
     setState(() {
-      _lastEpisodeByAnime = {
+      _lastEpisodeByContent = {
         for (final entry in history)
           (entry['url'] ?? '').toString():
               (entry['lastEpisodeName'] ?? '').toString(),
@@ -207,10 +207,10 @@ class _MyListContentState extends ConsumerState<_MyListContent>
         if (!mounted) return;
         final batch = list.skip(i).take(kBatch).toList();
         await Future.wait(batch.map((item) async {
-          final animeUrl = (item['animeUrl'] ?? '').toString();
-          if (animeUrl.isEmpty) return;
+          final contentUrl = (item['animeUrl'] ?? '').toString();
+          if (contentUrl.isEmpty) return;
           try {
-            final eps = await service.getEpisodes(animeUrl);
+            final eps = await service.getEpisodes(contentUrl);
             if (eps.isEmpty) return;
             final total = (item['totalEpisodes'] as int?) ?? 0;
             final prevCount = (item['episodesWatched'] as int?) ?? 0;
@@ -221,7 +221,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
             final watchedCount = watched.where(epUrls.contains).length;
             if (total != eps.length || prevCount != watchedCount) {
               await WatchHistory.syncMyListEpisodeCount(
-                animeUrl: animeUrl,
+                contentUrl: contentUrl,
                 watchedCount: watchedCount,
                 totalEpisodes: eps.length,
               );
@@ -268,7 +268,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
                     ),
                   ),
                   const Spacer(),
-                  const AnimeSearchButton(margin: EdgeInsets.zero),
+                  const SearchButton(margin: EdgeInsets.zero),
                 ],
               ),
             ),
@@ -317,7 +317,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
                       if (filtered.isEmpty) {
                         return Center(
                           child: Text(
-                            'No hay animes aquí',
+                            'No hay contenido aquí',
                             style: GoogleFonts.sora(
                                 color: VoidTheme.textSecondary, fontSize: 13),
                           ),
@@ -345,12 +345,12 @@ class _MyListContentState extends ConsumerState<_MyListContent>
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
                             final item = filtered[index];
-                            final animeUrl =
+                            final contentUrl =
                                 (item['animeUrl'] ?? '').toString();
                             return _MyListCard(
                               item: item,
                               lastEpisodeName:
-                                  _lastEpisodeByAnime[animeUrl] ?? '',
+                                  _lastEpisodeByContent[contentUrl] ?? '',
                             );
                           },
                         ),
@@ -379,7 +379,7 @@ class _MyListCard extends ConsumerWidget {
     final img = item['imagen'] as String;
     final epsWatched = item['episodesWatched'] as int;
     final epsTotal = item['totalEpisodes'] as int;
-    final animeUrl = item['animeUrl'] as String;
+    final contentUrl = item['animeUrl'] as String;
 
     double progress = 0.0;
     if (epsTotal > 0) {
@@ -391,9 +391,9 @@ class _MyListCard extends ConsumerWidget {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => AnimeDetailScreen(
-              animeUrl: animeUrl,
-              animeTitle: title,
+            builder: (_) => DetailScreen(
+              contentUrl: contentUrl,
+              contentTitle: title,
             ),
           ),
         );

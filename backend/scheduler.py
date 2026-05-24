@@ -21,11 +21,11 @@ def warmup_demo_catalog() -> None:
     """Precalienta datos demo para validar el flujo de scheduler."""
     try:
         provider = get_provider()
-        animes = provider.get_catalog()
+        catalog = provider.get_catalog()
         episodes = provider.get_latest_episodes()
         _log.info(
             "Demo warmup OK: %d catalog items, %d recent episodes",
-            len(animes),
+            len(catalog),
             len(episodes),
         )
     except Exception as exc:

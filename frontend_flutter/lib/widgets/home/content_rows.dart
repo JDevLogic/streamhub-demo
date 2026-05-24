@@ -82,7 +82,7 @@ class HorizontalEpisodioRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'anime-cover-${(ep['url'] ?? '').toString().replaceFirst('/ver/', '/anime/').replaceFirst(RegExp(r'-\d+$'), '')}',
+                    tag: 'cover-${(ep['url'] ?? '').toString().replaceFirst('/ver/', '/anime/').replaceFirst(RegExp(r'-\d+$'), '')}',
                     child: Container(
                       height: 170,
                       decoration: BoxDecoration(
@@ -163,18 +163,18 @@ class HorizontalEpisodioRow extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Recién Agregados / generic anime row
+// Recién Agregados / generic content row
 // ═══════════════════════════════════════════════════════════════════
 
-class HorizontalAnimeRow extends StatelessWidget {
-  const HorizontalAnimeRow({
+class HorizontalContentRow extends StatelessWidget {
+  const HorizontalContentRow({
     super.key,
-    required this.animes,
+    required this.items,
     required this.onTap,
     this.onRemove,
   });
 
-  final List<Map<String, dynamic>> animes;
+  final List<Map<String, dynamic>> items;
   final void Function(String titulo, String url, String imagen) onTap;
   final void Function(String url)? onRemove;
 
@@ -185,15 +185,15 @@ class HorizontalAnimeRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: animes.length,
+        itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, i) {
-          final anime    = animes[i];
-          final titulo   = (anime['titulo']    ?? '').toString();
-          final imagenHd = (anime['imagen_hd'] ?? '').toString();
-          final imagen   = imagenHd.isNotEmpty ? imagenHd : (anime['imagen'] ?? '').toString();
-          final url      = (anime['url']   ?? '').toString();
-          final tipo     = (anime['tipo']  ?? '').toString();
+          final item    = items[i];
+          final titulo   = (item['titulo']    ?? '').toString();
+          final imagenHd = (item['imagen_hd'] ?? '').toString();
+          final imagen   = imagenHd.isNotEmpty ? imagenHd : (item['imagen'] ?? '').toString();
+          final url      = (item['url']   ?? '').toString();
+          final tipo     = (item['tipo']  ?? '').toString();
 
           return TappableScale(
             onTap: () => onTap(titulo, url, imagen),
@@ -203,7 +203,7 @@ class HorizontalAnimeRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'anime-cover-$url',
+                    tag: 'cover-$url',
                     child: Container(
                       height: 170,
                       decoration: BoxDecoration(
@@ -310,11 +310,11 @@ class HorizontalAnimeRow extends StatelessWidget {
 class HorizontalEmisionRow extends StatelessWidget {
   const HorizontalEmisionRow({
     super.key,
-    required this.animes,
+    required this.items,
     required this.onTap,
   });
 
-  final List<Map<String, dynamic>> animes;
+  final List<Map<String, dynamic>> items;
   final void Function(String titulo, String url, String imagen) onTap;
 
   @override
@@ -324,13 +324,13 @@ class HorizontalEmisionRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: animes.length,
+        itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          final anime  = animes[i];
-          final titulo = (anime['titulo'] ?? '').toString();
-          final tipo   = (anime['tipo']   ?? '').toString();
-          final url    = (anime['url']    ?? '').toString();
+          final item  = items[i];
+          final titulo = (item['titulo'] ?? '').toString();
+          final tipo   = (item['tipo']   ?? '').toString();
+          final url    = (item['url']    ?? '').toString();
 
           return TappableScale(
             onTap: () => onTap(titulo, url, ''),
@@ -407,12 +407,12 @@ class HorizontalEmisionRow extends StatelessWidget {
 class ContinuarViendoRow extends StatefulWidget {
   const ContinuarViendoRow({
     super.key,
-    required this.animes,
+    required this.items,
     required this.onTap,
     this.onRemove,
   });
 
-  final List<Map<String, dynamic>> animes;
+  final List<Map<String, dynamic>> items;
   final void Function(Map<String, dynamic> entry) onTap;
   final void Function(String url)? onRemove;
 
@@ -432,7 +432,7 @@ class _ContinuarViendoRowState extends State<ContinuarViendoRow> {
   @override
   void didUpdateWidget(covariant ContinuarViendoRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.animes != widget.animes) {
+    if (oldWidget.items != widget.items) {
       _loadProgress();
     }
   }
@@ -449,21 +449,21 @@ class _ContinuarViendoRowState extends State<ContinuarViendoRow> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: widget.animes.length,
+        itemCount: widget.items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, i) {
-          final anime        = widget.animes[i];
-          final titulo       = (anime['titulo']       ?? '').toString();
-          final imagenHd     = (anime['imagen_hd']    ?? '').toString();
+          final item        = widget.items[i];
+          final titulo       = (item['titulo']       ?? '').toString();
+          final imagenHd     = (item['imagen_hd']    ?? '').toString();
           final imagen       = imagenHd.isNotEmpty
               ? imagenHd
-              : (anime['imagen'] ?? '').toString();
-          final url          = (anime['url']           ?? '').toString();
-          final lastEpName   = (anime['lastEpisodeName'] ?? '').toString();
-          final lastEpUrl    = (anime['lastEpisodeUrl']  ?? '').toString();
-          final hasNew       = anime['hasNewEpisode'] == true;
+              : (item['imagen'] ?? '').toString();
+          final url          = (item['url']           ?? '').toString();
+          final lastEpName   = (item['lastEpisodeName'] ?? '').toString();
+          final lastEpUrl    = (item['lastEpisodeUrl']  ?? '').toString();
+          final hasNew       = item['hasNewEpisode'] == true;
           final displayEpName = hasNew
-              ? (anime['newEpisodeName'] ?? '').toString()
+              ? (item['newEpisodeName'] ?? '').toString()
               : lastEpName;
 
           final prog             = _progressMap[lastEpUrl];
@@ -475,14 +475,14 @@ class _ContinuarViendoRowState extends State<ContinuarViendoRow> {
           final remainingMins    = (remaining / 60).floor();
 
           return TappableScale(
-            onTap: () => widget.onTap(anime),
+            onTap: () => widget.onTap(item),
             child: SizedBox(
               width: 130,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Hero(
-                    tag: 'anime-cover-$url',
+                    tag: 'cover-$url',
                     child: Container(
                     height: 170,
                     decoration: BoxDecoration(

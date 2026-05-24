@@ -379,7 +379,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Tu portal al mundo del anime',
+                    'Tu portal al mundo del streaming',
                     style: GoogleFonts.sora(
                       color: VoidTheme.textMuted,
                       fontSize: 12.5,

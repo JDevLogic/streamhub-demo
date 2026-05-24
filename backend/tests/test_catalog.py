@@ -71,7 +71,7 @@ def test_buscar_sin_resultado(client):
 
 def test_detail(client):
     r = client.get(
-        "/detail?url=demo://anime/demo-adventure", headers=HEADERS
+        "/detail?url=demo://content/demo-adventure", headers=HEADERS
     )
     assert r.status_code == 200
     data = r.json()
@@ -87,7 +87,7 @@ def test_detail_sin_url_devuelve_400(client):
 
 def test_episodios_devuelve_lista(client):
     r = client.get(
-        "/episodes?url=demo://anime/demo-adventure", headers=HEADERS
+        "/episodes?url=demo://content/demo-adventure", headers=HEADERS
     )
     assert r.status_code == 200
     data = r.json()

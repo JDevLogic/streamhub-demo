@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../screens/search_screen.dart';
 import '../theme.dart';
 
-class AnimeSearchButton extends StatelessWidget {
-  const AnimeSearchButton({super.key, this.onReturn, this.margin});
+class SearchButton extends StatelessWidget {
+  const SearchButton({super.key, this.onReturn, this.margin});
 
   final VoidCallback? onReturn;
   final EdgeInsetsGeometry? margin;

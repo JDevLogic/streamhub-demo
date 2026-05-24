@@ -55,7 +55,7 @@ class ListingsCache extends Table {
 }
 
 class MyListEntries extends Table {
-  TextColumn get animeUrl => text()();
+  TextColumn get contentUrl => text()();
   TextColumn get titulo => text()();
   TextColumn get imagen => text().withDefault(const Constant(''))();
   TextColumn get status => text()(); // 'en_proceso', 'planeado', 'completado', 'en_espera', 'abandonado'
@@ -66,7 +66,7 @@ class MyListEntries extends Table {
   IntColumn get deletedAt => integer().nullable()();
 
   @override
-  Set<Column> get primaryKey => {animeUrl};
+  Set<Column> get primaryKey => {contentUrl};
 }
 
 // ── Database class ────────────────────────────────────────────────────────────
@@ -410,7 +410,7 @@ class WatchDatabase extends _$WatchDatabase {
 
   Future<MyListEntry?> getMyListEntry(String url) {
     return (select(myListEntries)
-          ..where((t) => t.animeUrl.equals(url) & t.deletedAt.isNull()))
+          ..where((t) => t.contentUrl.equals(url) & t.deletedAt.isNull()))
         .getSingleOrNull();
   }
 
@@ -425,7 +425,7 @@ class WatchDatabase extends _$WatchDatabase {
 
   Future<void> removeMyListEntry(String url) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    await (update(myListEntries)..where((t) => t.animeUrl.equals(url))).write(
+    await (update(myListEntries)..where((t) => t.contentUrl.equals(url))).write(
       MyListEntriesCompanion(
         updatedAt: Value(now),
         deletedAt: Value(now),
@@ -508,7 +508,7 @@ class WatchDatabase extends _$WatchDatabase {
   }
 
   Future<void> mergeApplyMyList({
-    required String animeUrl,
+    required String contentUrl,
     required String titulo,
     required String imagen,
     required String status,
@@ -518,14 +518,14 @@ class WatchDatabase extends _$WatchDatabase {
     required int updatedAt,
     required int? deletedAt,
   }) async {
-    if (animeUrl.isEmpty) return;
+    if (contentUrl.isEmpty) return;
     final local = await (select(myListEntries)
-          ..where((t) => t.animeUrl.equals(animeUrl)))
+          ..where((t) => t.contentUrl.equals(contentUrl)))
         .getSingleOrNull();
     if (local != null && local.updatedAt > updatedAt) return;
     await into(myListEntries).insertOnConflictUpdate(
       MyListEntriesCompanion(
-        animeUrl:        Value(animeUrl),
+        contentUrl:        Value(contentUrl),
         titulo:          Value(titulo),
         imagen:          Value(imagen),
         status:          Value(status),

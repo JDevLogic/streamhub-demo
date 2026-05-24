@@ -1329,10 +1329,10 @@ class $MyListEntriesTable extends MyListEntries
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $MyListEntriesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _animeUrlMeta =
+  static const VerificationMeta _contentUrlMeta =
       const VerificationMeta('animeUrl');
   @override
-  late final GeneratedColumn<String> animeUrl = GeneratedColumn<String>(
+  late final GeneratedColumn<String> contentUrl = GeneratedColumn<String>(
       'anime_url', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tituloMeta = const VerificationMeta('titulo');
@@ -1389,7 +1389,7 @@ class $MyListEntriesTable extends MyListEntries
       type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
-        animeUrl,
+        contentUrl,
         titulo,
         imagen,
         status,
@@ -1410,10 +1410,10 @@ class $MyListEntriesTable extends MyListEntries
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('anime_url')) {
-      context.handle(_animeUrlMeta,
-          animeUrl.isAcceptableOrUnknown(data['anime_url']!, _animeUrlMeta));
+      context.handle(_contentUrlMeta,
+          contentUrl.isAcceptableOrUnknown(data['anime_url']!, _contentUrlMeta));
     } else if (isInserting) {
-      context.missing(_animeUrlMeta);
+      context.missing(_contentUrlMeta);
     }
     if (data.containsKey('titulo')) {
       context.handle(_tituloMeta,
@@ -1460,12 +1460,12 @@ class $MyListEntriesTable extends MyListEntries
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {animeUrl};
+  Set<GeneratedColumn> get $primaryKey => {contentUrl};
   @override
   MyListEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MyListEntry(
-      animeUrl: attachedDatabase.typeMapping
+      contentUrl: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}anime_url'])!,
       titulo: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}titulo'])!,
@@ -1493,7 +1493,7 @@ class $MyListEntriesTable extends MyListEntries
 }
 
 class MyListEntry extends DataClass implements Insertable<MyListEntry> {
-  final String animeUrl;
+  final String contentUrl;
   final String titulo;
   final String imagen;
   final String status;
@@ -1503,7 +1503,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   final int updatedAt;
   final int? deletedAt;
   const MyListEntry(
-      {required this.animeUrl,
+      {required this.contentUrl,
       required this.titulo,
       required this.imagen,
       required this.status,
@@ -1515,7 +1515,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['anime_url'] = Variable<String>(animeUrl);
+    map['anime_url'] = Variable<String>(contentUrl);
     map['titulo'] = Variable<String>(titulo);
     map['imagen'] = Variable<String>(imagen);
     map['status'] = Variable<String>(status);
@@ -1531,7 +1531,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
 
   MyListEntriesCompanion toCompanion(bool nullToAbsent) {
     return MyListEntriesCompanion(
-      animeUrl: Value(animeUrl),
+      contentUrl: Value(contentUrl),
       titulo: Value(titulo),
       imagen: Value(imagen),
       status: Value(status),
@@ -1549,7 +1549,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MyListEntry(
-      animeUrl: serializer.fromJson<String>(json['animeUrl']),
+      contentUrl: serializer.fromJson<String>(json['animeUrl']),
       titulo: serializer.fromJson<String>(json['titulo']),
       imagen: serializer.fromJson<String>(json['imagen']),
       status: serializer.fromJson<String>(json['status']),
@@ -1564,7 +1564,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'animeUrl': serializer.toJson<String>(animeUrl),
+      'animeUrl': serializer.toJson<String>(contentUrl),
       'titulo': serializer.toJson<String>(titulo),
       'imagen': serializer.toJson<String>(imagen),
       'status': serializer.toJson<String>(status),
@@ -1577,7 +1577,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   }
 
   MyListEntry copyWith(
-          {String? animeUrl,
+          {String? contentUrl,
           String? titulo,
           String? imagen,
           String? status,
@@ -1587,7 +1587,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
           int? updatedAt,
           Value<int?> deletedAt = const Value.absent()}) =>
       MyListEntry(
-        animeUrl: animeUrl ?? this.animeUrl,
+        contentUrl: contentUrl ?? this.contentUrl,
         titulo: titulo ?? this.titulo,
         imagen: imagen ?? this.imagen,
         status: status ?? this.status,
@@ -1599,7 +1599,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
       );
   MyListEntry copyWithCompanion(MyListEntriesCompanion data) {
     return MyListEntry(
-      animeUrl: data.animeUrl.present ? data.animeUrl.value : this.animeUrl,
+      contentUrl: data.contentUrl.present ? data.contentUrl.value : this.contentUrl,
       titulo: data.titulo.present ? data.titulo.value : this.titulo,
       imagen: data.imagen.present ? data.imagen.value : this.imagen,
       status: data.status.present ? data.status.value : this.status,
@@ -1618,7 +1618,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   @override
   String toString() {
     return (StringBuffer('MyListEntry(')
-          ..write('animeUrl: $animeUrl, ')
+          ..write('contentUrl: $contentUrl, ')
           ..write('titulo: $titulo, ')
           ..write('imagen: $imagen, ')
           ..write('status: $status, ')
@@ -1632,13 +1632,13 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
   }
 
   @override
-  int get hashCode => Object.hash(animeUrl, titulo, imagen, status,
+  int get hashCode => Object.hash(contentUrl, titulo, imagen, status,
       episodesWatched, totalEpisodes, ts, updatedAt, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MyListEntry &&
-          other.animeUrl == this.animeUrl &&
+          other.contentUrl == this.contentUrl &&
           other.titulo == this.titulo &&
           other.imagen == this.imagen &&
           other.status == this.status &&
@@ -1650,7 +1650,7 @@ class MyListEntry extends DataClass implements Insertable<MyListEntry> {
 }
 
 class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
-  final Value<String> animeUrl;
+  final Value<String> contentUrl;
   final Value<String> titulo;
   final Value<String> imagen;
   final Value<String> status;
@@ -1661,7 +1661,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
   final Value<int?> deletedAt;
   final Value<int> rowid;
   const MyListEntriesCompanion({
-    this.animeUrl = const Value.absent(),
+    this.contentUrl = const Value.absent(),
     this.titulo = const Value.absent(),
     this.imagen = const Value.absent(),
     this.status = const Value.absent(),
@@ -1673,7 +1673,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
     this.rowid = const Value.absent(),
   });
   MyListEntriesCompanion.insert({
-    required String animeUrl,
+    required String contentUrl,
     required String titulo,
     this.imagen = const Value.absent(),
     required String status,
@@ -1683,12 +1683,12 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : animeUrl = Value(animeUrl),
+  })  : contentUrl = Value(contentUrl),
         titulo = Value(titulo),
         status = Value(status),
         ts = Value(ts);
   static Insertable<MyListEntry> custom({
-    Expression<String>? animeUrl,
+    Expression<String>? contentUrl,
     Expression<String>? titulo,
     Expression<String>? imagen,
     Expression<String>? status,
@@ -1700,7 +1700,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (animeUrl != null) 'anime_url': animeUrl,
+      if (contentUrl != null) 'anime_url': contentUrl,
       if (titulo != null) 'titulo': titulo,
       if (imagen != null) 'imagen': imagen,
       if (status != null) 'status': status,
@@ -1714,7 +1714,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
   }
 
   MyListEntriesCompanion copyWith(
-      {Value<String>? animeUrl,
+      {Value<String>? contentUrl,
       Value<String>? titulo,
       Value<String>? imagen,
       Value<String>? status,
@@ -1725,7 +1725,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
       Value<int?>? deletedAt,
       Value<int>? rowid}) {
     return MyListEntriesCompanion(
-      animeUrl: animeUrl ?? this.animeUrl,
+      contentUrl: contentUrl ?? this.contentUrl,
       titulo: titulo ?? this.titulo,
       imagen: imagen ?? this.imagen,
       status: status ?? this.status,
@@ -1741,8 +1741,8 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (animeUrl.present) {
-      map['anime_url'] = Variable<String>(animeUrl.value);
+    if (contentUrl.present) {
+      map['anime_url'] = Variable<String>(contentUrl.value);
     }
     if (titulo.present) {
       map['titulo'] = Variable<String>(titulo.value);
@@ -1777,7 +1777,7 @@ class MyListEntriesCompanion extends UpdateCompanion<MyListEntry> {
   @override
   String toString() {
     return (StringBuffer('MyListEntriesCompanion(')
-          ..write('animeUrl: $animeUrl, ')
+          ..write('contentUrl: $contentUrl, ')
           ..write('titulo: $titulo, ')
           ..write('imagen: $imagen, ')
           ..write('status: $status, ')
@@ -2544,7 +2544,7 @@ typedef $$ListingsCacheTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function()>;
 typedef $$MyListEntriesTableCreateCompanionBuilder = MyListEntriesCompanion
     Function({
-  required String animeUrl,
+  required String contentUrl,
   required String titulo,
   Value<String> imagen,
   required String status,
@@ -2557,7 +2557,7 @@ typedef $$MyListEntriesTableCreateCompanionBuilder = MyListEntriesCompanion
 });
 typedef $$MyListEntriesTableUpdateCompanionBuilder = MyListEntriesCompanion
     Function({
-  Value<String> animeUrl,
+  Value<String> contentUrl,
   Value<String> titulo,
   Value<String> imagen,
   Value<String> status,
@@ -2578,8 +2578,8 @@ class $$MyListEntriesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get animeUrl => $composableBuilder(
-      column: $table.animeUrl, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get contentUrl => $composableBuilder(
+      column: $table.contentUrl, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get titulo => $composableBuilder(
       column: $table.titulo, builder: (column) => ColumnFilters(column));
@@ -2616,8 +2616,8 @@ class $$MyListEntriesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get animeUrl => $composableBuilder(
-      column: $table.animeUrl, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get contentUrl => $composableBuilder(
+      column: $table.contentUrl, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get titulo => $composableBuilder(
       column: $table.titulo, builder: (column) => ColumnOrderings(column));
@@ -2655,8 +2655,8 @@ class $$MyListEntriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get animeUrl =>
-      $composableBuilder(column: $table.animeUrl, builder: (column) => column);
+  GeneratedColumn<String> get contentUrl =>
+      $composableBuilder(column: $table.contentUrl, builder: (column) => column);
 
   GeneratedColumn<String> get titulo =>
       $composableBuilder(column: $table.titulo, builder: (column) => column);
@@ -2710,7 +2710,7 @@ class $$MyListEntriesTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$MyListEntriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> animeUrl = const Value.absent(),
+            Value<String> contentUrl = const Value.absent(),
             Value<String> titulo = const Value.absent(),
             Value<String> imagen = const Value.absent(),
             Value<String> status = const Value.absent(),
@@ -2722,7 +2722,7 @@ class $$MyListEntriesTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               MyListEntriesCompanion(
-            animeUrl: animeUrl,
+            contentUrl: contentUrl,
             titulo: titulo,
             imagen: imagen,
             status: status,
@@ -2734,7 +2734,7 @@ class $$MyListEntriesTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String animeUrl,
+            required String contentUrl,
             required String titulo,
             Value<String> imagen = const Value.absent(),
             required String status,
@@ -2746,7 +2746,7 @@ class $$MyListEntriesTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               MyListEntriesCompanion.insert(
-            animeUrl: animeUrl,
+            contentUrl: contentUrl,
             titulo: titulo,
             imagen: imagen,
             status: status,

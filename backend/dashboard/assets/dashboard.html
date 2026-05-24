@@ -400,10 +400,10 @@
           Configuradas
         </h3>
         <div class="card-actions">
-          <input class="search-input" id="intro-search" placeholder="Buscar anime/episodio/url..." oninput="setIntroSearch(this.value)"/>
+          <input class="search-input" id="intro-search" placeholder="Buscar título/episodio/url..." oninput="setIntroSearch(this.value)"/>
           <select class="search-input" id="intro-sort" style="width:170px" onchange="setIntroSort(this.value)">
-            <option value="anime_asc">Anime A-Z</option>
-            <option value="anime_desc">Anime Z-A</option>
+            <option value="title_asc">Título A-Z</option>
+            <option value="title_desc">Título Z-A</option>
             <option value="ep_asc">Episodio asc</option>
             <option value="ep_desc">Episodio desc</option>
             <option value="updated_desc">Mas reciente</option>
@@ -490,10 +490,10 @@
   <div class="page" id="page-debug">
 
     <!-- Step 1: Search -->
-    <div class="section-title">1 — Buscar anime</div>
+    <div class="section-title">1 — Buscar contenido</div>
     <div class="card fade-in" style="margin-bottom:20px">
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input class="search-input" id="dbg-search" placeholder="Nombre del anime..." style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')debugSearch()"/>
+        <input class="search-input" id="dbg-search" placeholder="Nombre del título..." style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')debugSearch()"/>
         <button class="btn-success" onclick="debugSearch()" id="dbg-search-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Buscar
@@ -505,7 +505,7 @@
 
     <!-- Step 2: Episodes -->
     <div id="dbg-episodes-section" style="display:none">
-      <div class="section-title">2 — Episodios <span id="dbg-ep-anime" style="color:var(--cyan);text-transform:none;letter-spacing:0;font-weight:700"></span></div>
+      <div class="section-title">2 — Episodios <span id="dbg-ep-content" style="color:var(--cyan);text-transform:none;letter-spacing:0;font-weight:700"></span></div>
       <div class="card fade-in" style="margin-bottom:20px">
         <div id="dbg-ep-status" style="font-size:.72rem;color:var(--dim);margin-bottom:8px;min-height:1.2em"></div>
         <div id="dbg-ep-list" style="max-height:350px;overflow-y:auto"></div>
