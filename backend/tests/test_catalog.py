@@ -99,6 +99,32 @@ def test_episodios_sin_url_devuelve_400(client):
     assert r.status_code == 400
 
 
+# -- Por género y prefetch --------------------------------------------------
+
+def test_by_genre_con_resultado(client):
+    r = client.get("/by-genre?genero=demo", headers=HEADERS)
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+
+
+def test_by_genre_sin_genero_devuelve_400(client):
+    r = client.get("/by-genre", headers=HEADERS)
+    assert r.status_code == 400
+
+
+def test_prefetch_devuelve_202(client):
+    r = client.post("/prefetch", headers=HEADERS)
+    assert r.status_code == 202
+    assert r.json()["mode"] == "demo"
+
+
+def test_detail_url_desconocida_devuelve_fallback(client):
+    r = client.get("/detail?url=demo://content/url-que-no-existe-xyz", headers=HEADERS)
+    assert r.status_code == 200
+    data = r.json()
+    assert data["titulo"] == "Demo Content"
+
+
 # -- Servidores y resolver --------------------------------------------------
 
 def test_sources(client):
