@@ -427,20 +427,15 @@ async function loadMetrics() {
     tbody.innerHTML = '';
     const entries = Object.entries(d);
     if (!entries.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--dim);text-align:center;padding:24px">Sin datos aun — aparecen cuando el backend recibe peticiones</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--dim);text-align:center;padding:24px">Sin datos aun -- aparecen cuando el backend recibe peticiones</td></tr>';
       return;
     }
     entries.sort((a,b) => (b[1].requests||0) - (a[1].requests||0));
     for (const [ep, v] of entries) {
-      const hr  = v.hit_rate != null ? (v.hit_rate*100).toFixed(1)+'%' : '--';
-      const cls = v.hit_rate == null ? '' : v.hit_rate >= .7 ? 'good' : v.hit_rate >= .4 ? 'warn' : 'bad';
       const row = document.createElement('tr');
       row.innerHTML = `
         <td><span class="mono">${ep}</span></td>
         <td class="num">${v.requests.toLocaleString()}</td>
-        <td class="num" style="color:var(--green)">${v.hits.toLocaleString()}</td>
-        <td class="num" style="color:var(--red)">${v.misses.toLocaleString()}</td>
-        <td>${cls ? '<span class="badge '+cls+'"><span class="badge-dot"></span>'+hr+'</span>' : hr}</td>
         <td class="num">${v.avg_ms != null ? v.avg_ms.toFixed(1) : '--'}</td>
         <td class="num">${v.p95_ms != null ? v.p95_ms.toFixed(1) : '--'}</td>`;
       tbody.appendChild(row);
