@@ -2,7 +2,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: anime_redis
+    container_name: streamhub_redis
     restart: unless-stopped
     command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     volumes:
@@ -10,18 +10,23 @@ services:
     expose:
       - "6379"
     networks:
-      - anime_net
+      - streamhub_net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: anime_backend
+    container_name: streamhub_backend
     restart: unless-stopped
     env_file: ./backend/.env
     environment:
@@ -30,7 +35,7 @@ services:
       - DB_DIR=/app/db_data
       - TZ=Europe/Madrid
     volumes:
-      # Persist SQLite DB and AniList disk cache between restarts
+      # Persist SQLite database and local cache between restarts
       - backend_data:/app/db_data
       - backend_cache:/app/.cache
     expose:
@@ -43,12 +48,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     networks:
-      - anime_net
+      - streamhub_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: anime_nginx
+    container_name: streamhub_nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -58,11 +69,19 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
-      - anime_net
+      - streamhub_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
   certbot:
     image: certbot/certbot
+    restart: "no"
+    command: certbot renew --webroot -w /var/www/certbot --quiet
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
@@ -73,5 +92,5 @@ volumes:
   backend_cache:
 
 networks:
-  anime_net:
+  streamhub_net:
     driver: bridge
