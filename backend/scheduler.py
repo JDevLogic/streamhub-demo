@@ -21,8 +21,8 @@ def warmup_demo_catalog() -> None:
     """Precalienta datos demo para validar el flujo de scheduler."""
     try:
         provider = get_provider()
-        animes = provider.get_animes()
-        episodes = provider.get_ultimos_episodios()
+        animes = provider.get_catalog()
+        episodes = provider.get_latest_episodes()
         _log.info(
             "Demo warmup OK: %d catalog items, %d recent episodes",
             len(animes),
@@ -36,7 +36,7 @@ def refresh_demo_sources() -> None:
     """Tarea periódica demo para mantener visible la arquitectura."""
     try:
         provider = get_provider()
-        provider.get_en_emision()
+        provider.get_on_air()
         _log.info("Demo refresh OK")
     except Exception as exc:
         _log.warning("Demo refresh failed: %s", exc)
@@ -86,4 +86,4 @@ def stop_scheduler() -> None:
         _scheduler.shutdown(wait=False)
         _log.info("Demo scheduler stopped")
 
-    _scheduler = None
+    _scheduler = None

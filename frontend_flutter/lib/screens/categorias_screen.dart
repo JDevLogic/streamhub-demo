@@ -219,7 +219,7 @@ class _GeneroAnimesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final animesAsync = ref.watch(animesporGeneroProvider(genero.slug));
+    final animesAsync = ref.watch(byGenreProvider(genero.slug));
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -257,7 +257,7 @@ class _GeneroAnimesScreen extends ConsumerWidget {
             icon: const Icon(Icons.refresh_rounded,
                 color: VoidTheme.textSecondary),
             onPressed: () =>
-                ref.invalidate(animesporGeneroProvider(genero.slug)),
+                ref.invalidate(byGenreProvider(genero.slug)),
           ),
           const AnimeSearchButton(),
         ],
@@ -269,7 +269,7 @@ class _GeneroAnimesScreen extends ConsumerWidget {
         error: (err, _) => Center(
           child: AppErrorState(
             error: err,
-            onRetry: () => ref.invalidate(animesporGeneroProvider(genero.slug)),
+            onRetry: () => ref.invalidate(byGenreProvider(genero.slug)),
           ),
         ),
         data: (animes) {
@@ -286,8 +286,8 @@ class _GeneroAnimesScreen extends ConsumerWidget {
             color: VoidTheme.primary,
             backgroundColor: VoidTheme.surface,
             onRefresh: () async {
-              ref.invalidate(animesporGeneroProvider(genero.slug));
-              await ref.read(animesporGeneroProvider(genero.slug).future);
+              ref.invalidate(byGenreProvider(genero.slug));
+              await ref.read(byGenreProvider(genero.slug).future);
             },
             child: GridView.builder(
               padding: const EdgeInsets.all(16),

@@ -2,17 +2,17 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/anime_service.dart';
+import '../services/content_service.dart';
 import '../services/watch_history.dart';
 
 /// Single shared instance — all call sites read from this provider.
-final animeServiceProvider = Provider<AnimeService>((ref) => AnimeService());
+final contentServiceProvider = Provider<ContentService>((ref) => ContentService());
 
 // ── Listing cache keys ────────────────────────────────────────────────────────
 
-const _kUltimosKey  = 'listing_ultimos_episodios';
-const _kEmisionKey  = 'listing_en_emision';
-const _kAgregadosKey = 'listing_animes_agregados';
+const _kLatestKey   = 'listing_latest_episodes';
+const _kOnAirKey    = 'listing_on_air';
+const _kCatalogKey  = 'listing_catalog';
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -43,32 +43,32 @@ Future<List<Map<String, dynamic>>> _fetchWithCache(
 /// (e.g. pull-to-refresh) or when the ProviderScope is disposed.
 /// Falls back to last cached data when offline.
 
-final ultimosEpisodiosProvider = FutureProvider<List<Map<String, dynamic>>>(
+final latestEpisodesProvider = FutureProvider<List<Map<String, dynamic>>>(
   (ref) => _fetchWithCache(
-    _kUltimosKey,
-    ref.watch(animeServiceProvider).getUltimosEpisodios,
+    _kLatestKey,
+    ref.watch(contentServiceProvider).getLatestEpisodes,
   ),
 );
 
-final enEmisionProvider = FutureProvider<List<Map<String, dynamic>>>(
+final onAirProvider = FutureProvider<List<Map<String, dynamic>>>(
   (ref) => _fetchWithCache(
-    _kEmisionKey,
-    ref.watch(animeServiceProvider).getEnEmision,
+    _kOnAirKey,
+    ref.watch(contentServiceProvider).getOnAir,
   ),
 );
 
-final animesAgregadosProvider = FutureProvider<List<Map<String, dynamic>>>(
+final catalogProvider = FutureProvider<List<Map<String, dynamic>>>(
   (ref) => _fetchWithCache(
-    _kAgregadosKey,
-    ref.watch(animeServiceProvider).getAnimes,
+    _kCatalogKey,
+    ref.watch(contentServiceProvider).getCatalog,
   ),
 );
 
-/// Keyed by anime URL — each URL gets its own cached entry.
+/// Keyed by content URL — each URL gets its own cached entry.
 /// Detail pages are not cached offline (too many URLs, lower priority).
-final animeDetalleProvider =
+final detailProvider =
     FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
-  (ref, url) => ref.watch(animeServiceProvider).getAnimeDetalle(url),
+  (ref, url) => ref.watch(contentServiceProvider).getDetail(url),
 );
 
 // Tab-visibility signals — incremented by MainNavigationScreen when the user
@@ -76,21 +76,20 @@ final animeDetalleProvider =
 final homeTabRefreshProvider    = StateProvider<int>((ref) => 0);
 final miListaTabRefreshProvider = StateProvider<int>((ref) => 0);
 
-/// Animes filtrados por g�nero en modo demo.
+/// Contenido filtrado por género en modo demo.
 /// autoDispose: se libera al salir del género — cache reside en el servidor.
-final animesporGeneroProvider =
+final byGenreProvider =
     FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>(
   (ref, genero) =>
-      ref.watch(animeServiceProvider).getAnimesporGenero(genero),
+      ref.watch(contentServiceProvider).getByGenre(genero),
 );
 
-/// Live episode count for a specific anime URL.
+/// Live episode count for a specific content URL.
 /// Used by detail screen to avoid stale `episodios_count` from detail cache.
-final animeEpisodeCountProvider =
+final episodeCountProvider =
     FutureProvider.autoDispose.family<int, String>(
   (ref, url) async {
-    final eps = await ref.watch(animeServiceProvider).getEpisodios(url);
+    final eps = await ref.watch(contentServiceProvider).getEpisodes(url);
     return eps.length;
   },
 );
-

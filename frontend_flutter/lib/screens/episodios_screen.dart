@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/anime_providers.dart';
 import '../providers/appearance_provider.dart';
-import '../services/anime_service.dart';
+import '../services/content_service.dart';
 import '../services/auto_resolve.dart';
 import '../services/watch_history.dart';
 import '../theme.dart';
@@ -159,8 +159,8 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
   @override
   void initState() {
     super.initState();
-    final service = ref.read(animeServiceProvider);
-    _futureEpisodios = service.getEpisodios(widget.animeUrl).then((eps) {
+    final service = ref.read(contentServiceProvider);
+    _futureEpisodios = service.getEpisodes(widget.animeUrl).then((eps) {
       _episodios = eps;
       _preloadServers(eps, service);
       _resolveInitialViewMode();
@@ -295,12 +295,12 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
   /// Preload servers + resolve top embed URL for the first episodes.
   /// Warms both the backend SQLite cache and the in-memory resolver cache
   /// so tapping an episode skips all network resolution.
-  void _preloadServers(List<Map<String, dynamic>> eps, AnimeService service) {
+  void _preloadServers(List<Map<String, dynamic>> eps, ContentService service) {
     for (final ep in eps.take(5)) {
       final url = (ep['url'] ?? '').toString();
       if (url.isEmpty) continue;
-      service.getServidores(url).then((servers) {
-        final sorted = AnimeService.sortServersByPriority(servers);
+      service.getSources(url).then((servers) {
+        final sorted = ContentService.sortServersByPriority(servers);
         // Resolve only the top-priority server to avoid hammering embed sites
         for (final srv in sorted.take(1)) {
           final enlace = (srv['enlace'] ?? '').toString();
@@ -364,7 +364,7 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
 
     await autoResolveAndPlay(
       context,
-      service: ref.read(animeServiceProvider),
+      service: ref.read(contentServiceProvider),
       animeTitle: widget.animeTitle,
       animeUrl: widget.animeUrl,
       animeImage: widget.animeImage,
@@ -407,8 +407,8 @@ class _EpisodiosScreenState extends ConsumerState<EpisodiosScreen> {
               error: snapshot.error!,
               onRetry: () => setState(
                 () => _futureEpisodios = ref
-                    .read(animeServiceProvider)
-                    .getEpisodios(widget.animeUrl),
+                    .read(contentServiceProvider)
+                    .getEpisodes(widget.animeUrl),
               ),
             );
           }
@@ -2517,7 +2517,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   Future<void> _loadIntroSkip(String epUrl) async {
     if (epUrl.isEmpty) return;
-    final service = ref.read(animeServiceProvider);
+    final service = ref.read(contentServiceProvider);
     final skip = await service.getIntroSkip(epUrl);
     if (!mounted) return;
     setState(() {
@@ -2556,8 +2556,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         lastKnownEpisodeCount: widget.episodios.length,
         estado: widget.animeStatus,
       );
-      final s = await ref.read(animeServiceProvider).getServidores(url);
-      final sorted = AnimeService.sortServersByPriority(s);
+      final s = await ref.read(contentServiceProvider).getSources(url);
+      final sorted = ContentService.sortServersByPriority(s);
       final ordered =
           await applyPreferredServerOrder(sorted, url, widget.animeUrl);
       setState(() {

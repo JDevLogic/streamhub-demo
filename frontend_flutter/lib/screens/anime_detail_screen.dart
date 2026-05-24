@@ -58,23 +58,23 @@ class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
   }
 
   Future<void> _refreshDetail() async {
-    ref.invalidate(animeDetalleProvider(_normalizedAnimeUrl));
+    ref.invalidate(detailProvider(_normalizedAnimeUrl));
     try {
-      await ref.read(animeDetalleProvider(_normalizedAnimeUrl).future);
+      await ref.read(detailProvider(_normalizedAnimeUrl).future);
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final detailAsync = ref.watch(animeDetalleProvider(_normalizedAnimeUrl));
+    final detailAsync = ref.watch(detailProvider(_normalizedAnimeUrl));
     final episodeCountAsync =
-        ref.watch(animeEpisodeCountProvider(_normalizedAnimeUrl));
+        ref.watch(episodeCountProvider(_normalizedAnimeUrl));
 
     // Silently refresh the stored cover in Mi Lista when the detail loads.
     // Prefer the provider image over AniList HD, which uses fuzzy matching
     // and can return the wrong cover for sequels/related entries.
     ref.listen<AsyncValue<Map<String, dynamic>>>(
-      animeDetalleProvider(_normalizedAnimeUrl),
+      detailProvider(_normalizedAnimeUrl),
       (_, next) {
         next.whenData((data) {
           final providerImage = (data['imagen'] ?? '').toString();
@@ -139,9 +139,9 @@ class _AnimeDetailScreenState extends ConsumerState<AnimeDetailScreen> {
                       onRetryDetail: _refreshDetail,
                       onEpisodesClosed: () {
                         ref.invalidate(
-                            animeEpisodeCountProvider(_normalizedAnimeUrl));
+                            episodeCountProvider(_normalizedAnimeUrl));
                         ref.invalidate(
-                            animeDetalleProvider(_normalizedAnimeUrl));
+                            detailProvider(_normalizedAnimeUrl));
                       },
                       onToggleSynopsis: () => setState(
                         () => _synopsisExpanded = !_synopsisExpanded,
@@ -721,7 +721,7 @@ class _RelatedAnimeCard extends ConsumerWidget {
     final normalizedUrl = _normalizeAnimeUrl(url);
     final needsFallback = image.isEmpty && url.isNotEmpty;
     final detailAsync =
-        needsFallback ? ref.watch(animeDetalleProvider(normalizedUrl)) : null;
+        needsFallback ? ref.watch(detailProvider(normalizedUrl)) : null;
 
     final fallbackImage = detailAsync?.maybeWhen(
           data: (data) {

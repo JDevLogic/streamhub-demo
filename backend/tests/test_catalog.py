@@ -8,20 +8,20 @@ HEADERS = {"X-API-Key": API_KEY}
 
 # -- Autenticación ----------------------------------------------------------
 
-def test_animes_sin_key_devuelve_422(client):
-    r = client.get("/animes")
+def test_catalog_sin_key_devuelve_422(client):
+    r = client.get("/catalog")
     assert r.status_code == 422
 
 
-def test_animes_key_incorrecta_devuelve_401(client):
-    r = client.get("/animes", headers={"X-API-Key": "clave-incorrecta"})
+def test_catalog_key_incorrecta_devuelve_401(client):
+    r = client.get("/catalog", headers={"X-API-Key": "clave-incorrecta"})
     assert r.status_code == 401
 
 
 # -- Catálogo ---------------------------------------------------------------
 
-def test_animes_devuelve_lista(client):
-    r = client.get("/animes", headers=HEADERS)
+def test_catalog_devuelve_lista(client):
+    r = client.get("/catalog", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)
@@ -31,7 +31,7 @@ def test_animes_devuelve_lista(client):
 
 
 def test_ultimos_episodios(client):
-    r = client.get("/ultimos-episodios", headers=HEADERS)
+    r = client.get("/latest-episodes", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)
@@ -39,7 +39,7 @@ def test_ultimos_episodios(client):
 
 
 def test_en_emision(client):
-    r = client.get("/en-emision", headers=HEADERS)
+    r = client.get("/on-air", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)
@@ -49,12 +49,12 @@ def test_en_emision(client):
 # -- Búsqueda ---------------------------------------------------------------
 
 def test_buscar_sin_query_devuelve_400(client):
-    r = client.get("/buscar", headers=HEADERS)
+    r = client.get("/search", headers=HEADERS)
     assert r.status_code == 400
 
 
 def test_buscar_con_resultado(client):
-    r = client.get("/buscar?q=demo", headers=HEADERS)
+    r = client.get("/search?q=demo", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)
@@ -62,16 +62,16 @@ def test_buscar_con_resultado(client):
 
 
 def test_buscar_sin_resultado(client):
-    r = client.get("/buscar?q=xyznotexists", headers=HEADERS)
+    r = client.get("/search?q=xyznotexists", headers=HEADERS)
     assert r.status_code == 200
     assert r.json() == []
 
 
 # -- Detalle y episodios ----------------------------------------------------
 
-def test_anime_detalle(client):
+def test_detail(client):
     r = client.get(
-        "/anime-detalle?url=demo://anime/demo-adventure", headers=HEADERS
+        "/detail?url=demo://anime/demo-adventure", headers=HEADERS
     )
     assert r.status_code == 200
     data = r.json()
@@ -80,14 +80,14 @@ def test_anime_detalle(client):
     assert "generos" in data
 
 
-def test_anime_detalle_sin_url_devuelve_400(client):
-    r = client.get("/anime-detalle", headers=HEADERS)
+def test_detail_sin_url_devuelve_400(client):
+    r = client.get("/detail", headers=HEADERS)
     assert r.status_code == 400
 
 
 def test_episodios_devuelve_lista(client):
     r = client.get(
-        "/episodios?url=demo://anime/demo-adventure", headers=HEADERS
+        "/episodes?url=demo://anime/demo-adventure", headers=HEADERS
     )
     assert r.status_code == 200
     data = r.json()
@@ -97,14 +97,14 @@ def test_episodios_devuelve_lista(client):
 
 
 def test_episodios_sin_url_devuelve_400(client):
-    r = client.get("/episodios", headers=HEADERS)
+    r = client.get("/episodes", headers=HEADERS)
     assert r.status_code == 400
 
 
 # -- Servidores y resolver --------------------------------------------------
 
 def test_servidores(client):
-    r = client.get("/servidores?url=demo://episode/test", headers=HEADERS)
+    r = client.get("/sources?url=demo://episode/test", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)

@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 
-class AnimeService {
+class ContentService {
   // Override with --dart-define=API_BASE_URL=...
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
@@ -86,11 +86,11 @@ class AnimeService {
     return entry.sources;
   }
 
-  Map<String, dynamic>? _getCachedDetail(String animeUrl) {
-    final entry = _detailCache[animeUrl];
+  Map<String, dynamic>? _getCachedDetail(String url) {
+    final entry = _detailCache[url];
     if (entry == null) return null;
     if (DateTime.now().difference(entry.at) > _detailTtl) {
-      _detailCache.remove(animeUrl);
+      _detailCache.remove(url);
       return null;
     }
     return entry.data;
@@ -98,68 +98,68 @@ class AnimeService {
 
   // ── API methods ───────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> getAnimes() =>
-      _getList('/animes', errorMessage: 'Error al cargar animes');
+  Future<List<Map<String, dynamic>>> getCatalog() =>
+      _getList('/catalog', errorMessage: 'Error al cargar catálogo');
 
-  Future<List<Map<String, dynamic>>> getEpisodios(String animeUrl) => _getList(
-        '/episodios',
-        params: {'url': animeUrl},
+  Future<List<Map<String, dynamic>>> getEpisodes(String contentUrl) => _getList(
+        '/episodes',
+        params: {'url': contentUrl},
         timeout: _heavyTimeout,
         errorMessage: 'Error al cargar episodios',
       );
 
-  Future<List<Map<String, dynamic>>> getServidores(String episodioUrl) =>
+  Future<List<Map<String, dynamic>>> getSources(String episodeUrl) =>
       _getList(
-        '/servidores',
-        params: {'url': episodioUrl},
-        errorMessage: 'Error al cargar servidores',
+        '/sources',
+        params: {'url': episodeUrl},
+        errorMessage: 'Error al cargar fuentes',
       );
 
-  Future<List<Map<String, dynamic>>> getUltimosEpisodios() => _getList(
-        '/ultimos-episodios',
+  Future<List<Map<String, dynamic>>> getLatestEpisodes() => _getList(
+        '/latest-episodes',
         errorMessage: 'Error al cargar últimos episodios',
       );
 
-  Future<List<Map<String, dynamic>>> getEnEmision() => _getList(
-        '/en-emision',
-        errorMessage: 'Error al cargar animes en emisión',
+  Future<List<Map<String, dynamic>>> getOnAir() => _getList(
+        '/on-air',
+        errorMessage: 'Error al cargar contenido en emisión',
       );
 
-  Future<List<Map<String, dynamic>>> buscarAnimes(String query) => _getList(
-        '/buscar',
+  Future<List<Map<String, dynamic>>> search(String query) => _getList(
+        '/search',
         params: {'q': query},
         errorMessage: 'Error en búsqueda',
       );
 
-  Future<List<Map<String, dynamic>>> getAnimesporGenero(String genero) =>
+  Future<List<Map<String, dynamic>>> getByGenre(String genero) =>
       _getList(
-        '/animes-por-genero',
+        '/by-genre',
         params: {'genero': genero},
-        errorMessage: 'Error al cargar animes por género',
+        errorMessage: 'Error al cargar contenido por género',
       );
 
-  Future<Map<String, dynamic>> getAnimeDetalle(String animeUrl) async {
-    final cached = _getCachedDetail(animeUrl);
+  Future<Map<String, dynamic>> getDetail(String url) async {
+    final cached = _getCachedDetail(url);
     if (cached != null) return cached;
 
-    final uri = Uri.parse('$baseUrl/anime-detalle')
-        .replace(queryParameters: {'url': animeUrl});
+    final uri = Uri.parse('$baseUrl/detail')
+        .replace(queryParameters: {'url': url});
     final response = await _get(uri, timeout: _heavyTimeout);
     if (response.statusCode != 200) {
       throw Exception(
-          'Error al cargar detalle del anime (HTTP ${response.statusCode})');
+          'Error al cargar detalle (HTTP ${response.statusCode})');
     }
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    _detailCache[animeUrl] = (data: data, at: DateTime.now());
+    _detailCache[url] = (data: data, at: DateTime.now());
     return data;
   }
 
   /// Returns intro skip times for an episode URL, or null if not configured.
-  Future<({double start, double end})?> getIntroSkip(String episodioUrl) async {
-    if (episodioUrl.isEmpty) return null;
+  Future<({double start, double end})?> getIntroSkip(String episodeUrl) async {
+    if (episodeUrl.isEmpty) return null;
     try {
       final uri = Uri.parse('$baseUrl/intro-skip')
-          .replace(queryParameters: {'url': episodioUrl});
+          .replace(queryParameters: {'url': episodeUrl});
       final response = await _get(uri, timeout: const Duration(seconds: 5));
       if (response.statusCode != 200) return null;
       final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -173,30 +173,30 @@ class AnimeService {
     }
   }
 
-  /// Warm the backend detail cache for a list of anime URLs (fire and forget).
-  void prefetch(List<String> animeUrls) {
-    if (animeUrls.isEmpty) return;
+  /// Warm the backend detail cache for a list of content URLs (fire and forget).
+  void prefetch(List<String> urls) {
+    if (urls.isEmpty) return;
     final uri = Uri.parse('$baseUrl/prefetch');
     http
         .post(uri,
             headers: {..._headers, 'Content-Type': 'application/json'},
-            body: jsonEncode({'urls': animeUrls}))
+            body: jsonEncode({'urls': urls}))
         .timeout(const Duration(seconds: 5))
         .catchError((_) => http.Response('', 200));
   }
 
   /// Warm local in-memory detail cache for first search results.
   /// This reduces first-open latency from Search -> Detail.
-  void prefetchDetailCache(List<String> animeUrls, {int limit = 4}) {
-    if (animeUrls.isEmpty) return;
-    final urls = animeUrls
+  void prefetchDetailCache(List<String> urls, {int limit = 4}) {
+    if (urls.isEmpty) return;
+    final targets = urls
         .map((u) => u.trim())
         .where((u) => u.isNotEmpty)
         .toSet()
         .take(limit);
-    for (final url in urls) {
+    for (final url in targets) {
       if (_getCachedDetail(url) != null) continue;
-      getAnimeDetalle(url).catchError((_) => <String, dynamic>{});
+      getDetail(url).catchError((_) => <String, dynamic>{});
     }
   }
 
@@ -256,4 +256,3 @@ class AnimeService {
     return sorted;
   }
 }
-

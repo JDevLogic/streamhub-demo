@@ -8,7 +8,7 @@ import '../screens/native_player_screen.dart';
 import '../screens/episodios_screen.dart' show PlayerScreen;
 import '../theme.dart';
 import '../widgets/loading_episode_overlay.dart';
-import 'anime_service.dart';
+import 'content_service.dart';
 import 'watch_history.dart';
 
 /// Resultado devuelto por [autoResolveAndPlay] para que el caller pueda
@@ -103,7 +103,7 @@ typedef _Resolved = ({Map<String, dynamic> srv, List<Map<String, dynamic>> sourc
 /// when two resolve at the same time, whichever completes first wins.
 Future<_Resolved?> _raceResolvers(
   List<Map<String, dynamic>> servers,
-  AnimeService service,
+  ContentService service,
 ) async {
   if (servers.isEmpty) return null;
   final completer = Completer<_Resolved?>();
@@ -142,7 +142,7 @@ Future<_Resolved?> _raceResolvers(
 /// PlayerScreen de WebView pueda navegar entre episodios.
 Future<AutoResolveResult> autoResolveAndPlay(
   BuildContext context, {
-  required AnimeService service,
+  required ContentService service,
   required String animeTitle,
   required String animeUrl,
   required String animeImage,
@@ -167,7 +167,7 @@ Future<AutoResolveResult> autoResolveAndPlay(
 
   try {
     // 1. Fetch servers + intro-skip in parallel (intro warms cache for later)
-    final serversFuture = service.getServidores(episodioUrl);
+    final serversFuture = service.getSources(episodioUrl);
     unawaited(service.getIntroSkip(episodioUrl));
     final raw = await serversFuture;
     if (!navContext.mounted) return AutoResolveResult.error;
@@ -191,7 +191,7 @@ Future<AutoResolveResult> autoResolveAndPlay(
     );
 
     // 3. Sort by demo priority
-    var servidores = AnimeService.sortServersByPriority(raw); // static utility
+    var servidores = ContentService.sortServersByPriority(raw); // static utility
 
     // 4. Promote cached best server to front if still present
     servidores = await applyPreferredServerOrder(servidores, episodioUrl, animeUrl);

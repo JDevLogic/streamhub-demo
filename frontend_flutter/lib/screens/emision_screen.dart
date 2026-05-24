@@ -28,7 +28,7 @@ class EmisionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final emisionAsync = ref.watch(enEmisionProvider);
+    final emisionAsync = ref.watch(onAirProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -45,7 +45,7 @@ class EmisionScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh_rounded,
                 color: VoidTheme.textSecondary),
-            onPressed: () => ref.invalidate(enEmisionProvider),
+            onPressed: () => ref.invalidate(onAirProvider),
           ),
           const AnimeSearchButton(),
         ],
@@ -57,7 +57,7 @@ class EmisionScreen extends ConsumerWidget {
         error: (err, _) => Center(
           child: AppErrorState(
             error: err,
-            onRetry: () => ref.invalidate(enEmisionProvider),
+            onRetry: () => ref.invalidate(onAirProvider),
           ),
         ),
         data: (animes) {
@@ -74,8 +74,8 @@ class EmisionScreen extends ConsumerWidget {
             color: VoidTheme.primary,
             backgroundColor: VoidTheme.surface,
             onRefresh: () async {
-              ref.invalidate(enEmisionProvider);
-              await ref.read(enEmisionProvider.future);
+              ref.invalidate(onAirProvider);
+              await ref.read(onAirProvider.future);
             },
             child: GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -146,7 +146,7 @@ class _EmisionGridItem extends ConsumerWidget {
     final shouldTryDetailFallback =
         false;
     final detailAsync =
-        shouldTryDetailFallback ? ref.watch(animeDetalleProvider(url)) : null;
+        shouldTryDetailFallback ? ref.watch(detailProvider(url)) : null;
 
     final detailImage = detailAsync?.maybeWhen(
           data: (data) {

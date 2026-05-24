@@ -99,9 +99,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _refreshingOnResume = true;
     _triggerCloudSync().then((_) {
       if (!mounted) return;
-      ref.invalidate(ultimosEpisodiosProvider);
-      ref.invalidate(enEmisionProvider);
-      ref.invalidate(animesAgregadosProvider);
+      ref.invalidate(latestEpisodesProvider);
+      ref.invalidate(onAirProvider);
+      ref.invalidate(catalogProvider);
       _refreshVistos();
       _scheduleSwrRecheck();
     });
@@ -121,9 +121,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _prefetchVisible() async {
     try {
       final results = await Future.wait([
-        ref.read(ultimosEpisodiosProvider.future),
-        ref.read(enEmisionProvider.future),
-        ref.read(animesAgregadosProvider.future),
+        ref.read(latestEpisodesProvider.future),
+        ref.read(onAirProvider.future),
+        ref.read(catalogProvider.future),
       ]);
       final episodios = results[0];
       final emision = results[1];
@@ -146,7 +146,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         final url = (anime['url'] ?? '').toString();
         if (url.isNotEmpty) urls.add(url);
       }
-      ref.read(animeServiceProvider).prefetch(urls.toList());
+      ref.read(contentServiceProvider).prefetch(urls.toList());
     } catch (_) {}
   }
 
@@ -207,7 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
         try {
           final eps =
-              await ref.read(animeServiceProvider).getEpisodios(animeUrl);
+              await ref.read(contentServiceProvider).getEpisodes(animeUrl);
           if (eps.isEmpty) return preMerged;
 
           // Reconcile Mi Lista's totalEpisodes/episodesWatched whenever we
@@ -242,8 +242,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             try {
               final detailUrl = _normalizeAnimeUrl(animeUrl);
               final detail = await ref
-                  .read(animeServiceProvider)
-                  .getAnimeDetalle(detailUrl);
+                  .read(contentServiceProvider)
+                  .getDetail(detailUrl);
               final recovered =
                   (detail['imagen_hd'] ?? detail['imagen'] ?? '').toString();
               if (recovered.isNotEmpty) {
@@ -366,14 +366,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _refreshAll() async {
     await _triggerCloudSync();
 
-    ref.invalidate(ultimosEpisodiosProvider);
-    ref.invalidate(enEmisionProvider);
-    ref.invalidate(animesAgregadosProvider);
+    ref.invalidate(latestEpisodesProvider);
+    ref.invalidate(onAirProvider);
+    ref.invalidate(catalogProvider);
     await Future.wait([
       _loadVistos(),
-      ref.read(ultimosEpisodiosProvider.future),
-      ref.read(enEmisionProvider.future),
-      ref.read(animesAgregadosProvider.future),
+      ref.read(latestEpisodesProvider.future),
+      ref.read(onAirProvider.future),
+      ref.read(catalogProvider.future),
     ]);
   }
 
@@ -438,7 +438,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     List<Map<String, dynamic>> episodios = [];
     int episodeIndex = 0;
     try {
-      episodios = await ref.read(animeServiceProvider).getEpisodios(animeUrl);
+      episodios = await ref.read(contentServiceProvider).getEpisodes(animeUrl);
       episodeIndex = episodios.indexWhere(
         (e) => (e['url'] ?? '').toString() == episodioUrl,
       );
@@ -448,7 +448,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (!mounted) return;
     await autoResolveAndPlay(
       context,
-      service: ref.read(animeServiceProvider),
+      service: ref.read(contentServiceProvider),
       animeTitle: animeTitle,
       animeUrl: animeUrl,
       animeImage: animeImage,
@@ -518,7 +518,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             SliverToBoxAdapter(
               child: FadeInEntrance(
                 duration: const Duration(milliseconds: 800),
-                child: ref.watch(ultimosEpisodiosProvider).when(
+                child: ref.watch(latestEpisodesProvider).when(
                       loading: _heroPlaceholder,
                       error: (_, __) => _heroPlaceholder(),
                       data: (eps) => eps.isEmpty
@@ -535,8 +535,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 delay: const Duration(milliseconds: 150),
                 child: _buildSection(
                   title: 'Últimos Episodios',
-                  async: ref.watch(ultimosEpisodiosProvider),
-                  onRetry: () => ref.invalidate(ultimosEpisodiosProvider),
+                  async: ref.watch(latestEpisodesProvider),
+                  onRetry: () => ref.invalidate(latestEpisodesProvider),
                   shimmer: const _ShimmerHorizontalList(
                       child: EpisodeCardSkeleton()),
                   builder: (eps) => HorizontalEpisodioRow(
@@ -587,8 +587,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 delay: const Duration(milliseconds: 450),
                 child: _buildSection(
                   title: 'Recién Agregados',
-                  async: ref.watch(animesAgregadosProvider),
-                  onRetry: () => ref.invalidate(animesAgregadosProvider),
+                  async: ref.watch(catalogProvider),
+                  onRetry: () => ref.invalidate(catalogProvider),
                   shimmer:
                       const _ShimmerHorizontalList(child: AnimeCardSkeleton()),
                   builder: (animes) => HorizontalAnimeRow(

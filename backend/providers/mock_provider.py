@@ -212,20 +212,20 @@ _ULTIMOS: list[dict[str, Any]] = [
 class MockProvider:
     """Proveedor de datos seguro para la versión pública demo."""
 
-    def get_animes(self) -> list[dict[str, Any]]:
+    def get_catalog(self) -> list[dict[str, Any]]:
         return list(_ANIMES)
 
-    def get_ultimos_episodios(self) -> list[dict[str, Any]]:
+    def get_latest_episodes(self) -> list[dict[str, Any]]:
         return list(_ULTIMOS)
 
-    def get_en_emision(self) -> list[dict[str, Any]]:
+    def get_on_air(self) -> list[dict[str, Any]]:
         return [a for a in _ANIMES if a["estado"] == "En emisión"]
 
-    def buscar(self, q: str) -> list[dict[str, Any]]:
+    def search(self, q: str) -> list[dict[str, Any]]:
         query = q.lower().strip()
         return [a for a in _ANIMES if query in a["titulo"].lower()]
 
-    def get_animes_por_genero(self, genero: str) -> list[dict[str, Any]]:
+    def get_by_genre(self, genero: str) -> list[dict[str, Any]]:
         g = genero.lower()
         result = []
         for anime in _ANIMES:
@@ -235,7 +235,7 @@ class MockProvider:
                 result.append(anime)
         return result or list(_ANIMES)
 
-    def get_anime_detalle(self, url: str) -> dict[str, Any]:
+    def get_detail(self, url: str) -> dict[str, Any]:
         detail = _DETAILS.get(url)
         if detail:
             return {**detail, "url": url}
@@ -256,7 +256,7 @@ class MockProvider:
             "relaciones": [],
         }
 
-    def get_episodios(self, url: str) -> list[dict[str, Any]]:
+    def get_episodes(self, url: str) -> list[dict[str, Any]]:
         detail = _DETAILS.get(url, {})
         count = detail.get("episodios_count", 3)
         slug = url.split("/")[-1] if "/" in url else "demo"
@@ -269,7 +269,7 @@ class MockProvider:
             for i in range(1, count + 1)
         ]
 
-    def get_servidores(self, url: str) -> list[dict[str, Any]]:
+    def get_sources(self, url: str) -> list[dict[str, Any]]:
         return [
             {
                 "servidor": "Demo Video",

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/anime_providers.dart'
-    show animeServiceProvider, miListaTabRefreshProvider;
+    show contentServiceProvider, miListaTabRefreshProvider;
 import '../providers/auth_provider.dart';
 import '../providers/my_list_provider.dart';
 import '../services/watch_history.dart';
@@ -199,7 +199,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
       final watched = await WatchHistory.getWatchedEpisodes();
       if (list.isEmpty) return;
 
-      final service = ref.read(animeServiceProvider);
+      final service = ref.read(contentServiceProvider);
       bool changed = false;
 
       const kBatch = 3;
@@ -210,7 +210,7 @@ class _MyListContentState extends ConsumerState<_MyListContent>
           final animeUrl = (item['animeUrl'] ?? '').toString();
           if (animeUrl.isEmpty) return;
           try {
-            final eps = await service.getEpisodios(animeUrl);
+            final eps = await service.getEpisodes(animeUrl);
             if (eps.isEmpty) return;
             final total = (item['totalEpisodes'] as int?) ?? 0;
             final prevCount = (item['episodesWatched'] as int?) ?? 0;

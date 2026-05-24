@@ -101,8 +101,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _controller.selection =
         TextSelection.collapsed(offset: _controller.text.length);
     _saveToHistory(q);
-    final service = ref.read(animeServiceProvider);
-    final future = service.buscarAnimes(q);
+    final service = ref.read(contentServiceProvider);
+    final future = service.search(q);
     setState(() {
       _hasSearched = true;
       _futureResults = future;
@@ -499,7 +499,7 @@ class _SearchAnimeTile extends ConsumerWidget {
     final normalizedUrl = _normalizeAnimeUrl(url);
     final needsFallback = image.isEmpty && url.isNotEmpty;
     final detailAsync =
-        needsFallback ? ref.watch(animeDetalleProvider(normalizedUrl)) : null;
+        needsFallback ? ref.watch(detailProvider(normalizedUrl)) : null;
     final fallbackImage = detailAsync?.maybeWhen(
           data: (data) {
             final hd = (data['imagen_hd'] ?? '').toString();

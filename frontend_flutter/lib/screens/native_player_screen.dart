@@ -9,7 +9,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../providers/anime_providers.dart';
-import '../services/anime_service.dart';
+import '../services/content_service.dart';
 import '../services/auto_resolve.dart';
 import '../services/watch_history.dart';
 import '../theme.dart';
@@ -480,9 +480,9 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
     // Step 3 — try other servers for this episode (limit to top 3 for speed)
     if (_episodeUrl.isNotEmpty) {
       try {
-        final service = ref.read(animeServiceProvider);
-        final raw    = await service.getServidores(_episodeUrl);
-        final sorted = AnimeService.sortServersByPriority(raw);
+        final service = ref.read(contentServiceProvider);
+        final raw    = await service.getSources(_episodeUrl);
+        final sorted = ContentService.sortServersByPriority(raw);
 
         for (final srv in sorted.take(3)) {
           final enlace = (srv['enlace'] ?? '').toString();
@@ -708,8 +708,8 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
     }
 
     try {
-      final service    = ref.read(animeServiceProvider);
-      final servidores = await service.getServidores(epUrl);
+      final service    = ref.read(contentServiceProvider);
+      final servidores = await service.getSources(epUrl);
 
       WatchHistory.add(
         titulo: widget.animeTitle,
@@ -720,7 +720,7 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
         lastKnownEpisodeCount: widget.episodios.length,
       );
 
-      final sorted = AnimeService.sortServersByPriority(servidores);
+      final sorted = ContentService.sortServersByPriority(servidores);
 
       for (final srv in sorted) {
         final enlace = (srv['enlace'] ?? '').toString();
@@ -781,11 +781,11 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
   // ── Adjacent prefetch ─────────────────────────────────────────────
 
   /// Kick off background resolution for the next and previous episodes.
-  /// Results land in [_prefetch] and [AnimeService._resolvedCache] so that
+  /// Results land in [_prefetch] and [ContentService._resolvedCache] so that
   /// [_changeEpisode] can skip all network work when the user taps next/prev.
   void _prefetchAdjacent() {
     if (widget.episodios.isEmpty) return;
-    final service = ref.read(animeServiceProvider);
+    final service = ref.read(contentServiceProvider);
     for (final idx in [_epIdx + 1, _epIdx - 1]) {
       if (idx < 0 || idx >= widget.episodios.length) continue;
       final epUrl = (widget.episodios[idx]['url'] ?? '').toString();
@@ -794,10 +794,10 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
     }
   }
 
-  Future<void> _prefetchEpisode(AnimeService service, String epUrl) async {
+  Future<void> _prefetchEpisode(ContentService service, String epUrl) async {
     try {
-      final servers = await service.getServidores(epUrl);
-      final sorted  = AnimeService.sortServersByPriority(servers);
+      final servers = await service.getSources(epUrl);
+      final sorted  = ContentService.sortServersByPriority(servers);
       for (final srv in sorted.take(3)) {
         final enlace = (srv['enlace'] ?? '').toString();
         if (enlace.isEmpty) continue;
@@ -815,7 +815,7 @@ class _NativePlayerScreenState extends ConsumerState<NativePlayerScreen>
 
   Future<void> _loadIntroSkip(String epUrl) async {
     if (epUrl.isEmpty) return;
-    final service = ref.read(animeServiceProvider);
+    final service = ref.read(contentServiceProvider);
     final skip = await service.getIntroSkip(epUrl);
     if (!mounted) return;
     setState(() {

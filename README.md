@@ -34,7 +34,7 @@
 
 ## ¿Qué demuestra este proyecto?
 
-StreamHub es la versión pública de un sistema de streaming personal diseñado para practicar e integrar múltiples áreas del desarrollo de software en un mismo proyecto cohesionado:
+StreamHub es un proyecto full-stack diseñado para practicar e integrar múltiples áreas del desarrollo de software en un mismo proyecto cohesionado:
 
 | Área | Patrones y tecnologías |
 |---|---|
@@ -152,7 +152,7 @@ Los servicios arrancan en orden garantizado por healthchecks: `redis` → `backe
 
 ```bash
 docker compose ps          # todos deben aparecer como "healthy"
-curl http://localhost:5050/health
+curl http://localhost/health
 ```
 
 | Contenedor | Imagen | Función |
@@ -227,13 +227,13 @@ DATA_PROVIDER=mock
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/animes` | Catálogo de contenido |
-| `GET` | `/ultimos-episodios` | Episodios recientes |
-| `GET` | `/en-emision` | Contenido en emisión |
-| `GET` | `/buscar?q=` | Búsqueda en el catálogo |
-| `GET` | `/anime-detalle?url=` | Detalle de título |
-| `GET` | `/episodios?url=` | Lista de episodios |
-| `GET` | `/servidores?url=` | Fuentes de vídeo disponibles |
+| `GET` | `/catalog` | Catálogo de contenido |
+| `GET` | `/latest-episodes` | Episodios recientes |
+| `GET` | `/on-air` | Contenido en emisión |
+| `GET` | `/search?q=` | Búsqueda en el catálogo |
+| `GET` | `/detail?url=` | Detalle de título |
+| `GET` | `/episodes?url=` | Lista de episodios |
+| `GET` | `/sources?url=` | Fuentes de vídeo disponibles |
 | `GET` | `/resolver?url=` | Resolución a URL de reproducción |
 | `POST` | `/auth/register` | Registro de usuario |
 | `POST` | `/auth/login` | Inicio de sesión |
