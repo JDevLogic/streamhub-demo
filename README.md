@@ -214,7 +214,9 @@ La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos son fict
 
 ## Despliegue en VPS
 
-El directorio `deploy/` incluye un script de setup para Ubuntu/Debian y un service de systemd. El directorio `nginx/` contiene la configuración de reverse proxy con soporte para HTTPS vía Certbot.
+El directorio `deploy/` incluye un script de setup para Ubuntu/Debian, un service de systemd y una configuración de Nginx para despliegue directo (sin Docker), que hace proxy a `127.0.0.1:5050`.
+
+El directorio `nginx/` contiene la configuración para el stack Docker Compose, con TLS termination vía Certbot y proxy al servicio interno `backend:5050`.
 
 ```bash
 # En el servidor (como root)
