@@ -83,6 +83,7 @@ Cliente Flutter
 - **Nginx como TLS terminator** — FastAPI nunca toca SSL; Nginx reenvía `X-Real-IP` para que el rate limiter vea la IP del cliente, no la del proxy.
 - **SQLite en modo WAL** — permite lecturas concurrentes sin bloquear escrituras, necesario con múltiples workers de Uvicorn.
 - **SQLite con múltiples roles** — rate limiting (sliding-window), autenticación (usuarios + sesiones Bearer), sincronización de estado del usuario y telemetría durable.
+- **APScheduler en background** — precalienta la caché al arrancar y lanza refresco periódico de datos; en producción aloja las tareas de actualización del catálogo sin bloquear el event loop de FastAPI.
 
 **Patrones de caché destacados:**
 
