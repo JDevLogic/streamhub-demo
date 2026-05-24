@@ -35,3 +35,9 @@ jobs:
       - name: Ejecutar tests con cobertura
         working-directory: backend
         run: pytest tests/ -v --cov=. --cov-report=term-missing --cov-report=xml
+
+      - name: Subir cobertura a Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage.xml
+          fail_ci_if_error: false

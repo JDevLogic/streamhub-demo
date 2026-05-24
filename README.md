@@ -5,6 +5,7 @@
 *Plataforma de streaming full-stack construida como portfolio técnico. Combina una API REST con FastAPI, caché en dos capas con Redis, autenticación completa, dashboard de telemetría propio y un cliente móvil nativo en Flutter.*
 
 ![CI](https://github.com/JDevLogic/streamhub-demo/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://codecov.io/gh/JDevLogic/streamhub-demo/branch/main/graph/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat&logo=fastapi&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)
