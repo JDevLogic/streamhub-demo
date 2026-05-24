@@ -19,6 +19,8 @@
 
 ---
 
+## Vista previa
+
 **Vista general** — métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento.
 ![Vista general](docs/screenshots/dashboard-overview.png)
 
