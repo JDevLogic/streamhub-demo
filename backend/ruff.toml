@@ -1,0 +1,12 @@
+target-version = "py312"
+
+[lint]
+# E: pycodestyle errors  F: pyflakes
+select = ["E", "F"]
+ignore = [
+    "E501",   # line too long — no hard limit
+    "F401",   # unused imports — handled by editors
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["F811"]   # redefined fixtures are normal in pytest

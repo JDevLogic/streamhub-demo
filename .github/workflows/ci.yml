@@ -28,6 +28,10 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Ejecutar tests
+      - name: Lint (ruff)
         working-directory: backend
-        run: pytest tests/ -v
+        run: ruff check .
+
+      - name: Ejecutar tests con cobertura
+        working-directory: backend
+        run: pytest tests/ -v --cov=. --cov-report=term-missing --cov-report=xml
