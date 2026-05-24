@@ -9,7 +9,7 @@ import sqlite3
 from pathlib import Path
 
 _DB_DIR = Path(os.environ.get("DB_DIR", str(Path(__file__).resolve().parent)))
-DB_PATH = _DB_DIR / "anime_cache.db"
+DB_PATH = _DB_DIR / "streamhub_cache.db"
 
 _DDL = """
 PRAGMA journal_mode=WAL;
