@@ -10,8 +10,13 @@
 
 ## Vista previa
 
+**Vista general** — métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento.
 ![Vista general](docs/screenshots/dashboard-overview.png)
+
+**Actividad** — registro de cada petición con método, ruta, status, tiempo de respuesta e IP.
 ![Actividad](docs/screenshots/dashboard-activity.png)
+
+**Métricas por endpoint** — requests totales, tiempo promedio y percentil 95 por ruta.
 ![Métricas](docs/screenshots/dashboard-metrics.png)
 
 ---
@@ -90,7 +95,7 @@ streamhub-demo/
 │   ├── db/               # Redis, SQLite, métricas y caché service
 │   ├── dashboard/        # Panel de telemetría (HTML + JS + Basic Auth)
 │   ├── utils/            # Buffer de logs y registro de actividad
-│   └── tests/            # Tests de integración (26 tests, pytest)
+│   └── tests/            # Tests de integración (pytest)
 ├── frontend_flutter/     # Cliente Android (Flutter)
 ├── nginx/                # Configuración reverse proxy + HTTPS
 ├── deploy/               # Script de setup para VPS + systemd service
@@ -189,7 +194,7 @@ DATA_PROVIDER=mock
 
 ## Modo demo
 
-La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos son ficticios (títulos inventados, imágenes de dominio público). El endpoint `/resolver` apunta a un vídeo de Google con licencia Creative Commons, usado únicamente para validar el flujo completo:
+La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos son ficticios (títulos inventados, imágenes de dominio público). Redis no es necesario en este modo — el backend arranca sin él y opera en degradado (métricas en memoria). El endpoint `/resolver` apunta a un vídeo de Google con licencia Creative Commons, usado únicamente para validar el flujo completo:
 
 - Reproducción nativa en el player
 - Progreso y "continuar viendo"
@@ -212,6 +217,8 @@ bash deploy/setup.sh
 ## Contribuir
 
 Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para instrucciones de setup, cómo ejecutar los tests y las convenciones del proyecto.
+
+El backend incluye una suite de integración que cubre los endpoints principales y el flujo de autenticación completo. Los tests no requieren Redis ni variables de entorno configuradas; el CI los ejecuta automáticamente en cada push.
 
 ---
 
