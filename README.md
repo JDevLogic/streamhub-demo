@@ -1,4 +1,8 @@
+<div align="center">
+
 # StreamHub Demo
+
+*Plataforma de streaming full-stack construida como portfolio técnico. Combina una API REST con FastAPI, caché en dos capas con Redis, autenticación completa, dashboard de telemetría propio y un cliente móvil nativo en Flutter.*
 
 ![CI](https://github.com/JDevLogic/streamhub-demo/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
@@ -10,20 +14,14 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
-## Vista previa
-
-**Vista general** — métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento.
-![Vista general](docs/screenshots/dashboard-overview.png)
-
-**Actividad** — registro de cada petición con método, ruta, status, tiempo de respuesta e IP.
-![Actividad](docs/screenshots/dashboard-activity.png)
-
-**Métricas por endpoint** — requests totales, tiempo promedio y percentil 95 por ruta.
-![Métricas](docs/screenshots/dashboard-metrics.png)
-
 ---
 
-> Plataforma de streaming full-stack construida como portfolio técnico. Combina una API REST con FastAPI, caché en dos capas con Redis, autenticación completa, dashboard de telemetría propio y un cliente móvil nativo en Flutter.
+| Vista general | Actividad | Métricas |
+|:---:|:---:|:---:|
+| ![Vista general](docs/screenshots/dashboard-overview.png) | ![Actividad](docs/screenshots/dashboard-activity.png) | ![Métricas](docs/screenshots/dashboard-metrics.png) |
+| Métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento | Registro de cada petición con método, ruta, status, tiempo e IP | Requests totales, tiempo promedio y percentil 95 por ruta |
+
+</div>
 
 ---
 
@@ -45,22 +43,46 @@ StreamHub es la versión pública de un sistema de streaming personal diseñado 
 
 ## Stack
 
+<table>
+<tr>
+<td valign="top" width="50%">
+
+**Backend**
+
 | Capa | Tecnología |
 |---|---|
 | API | FastAPI + Uvicorn |
 | Caché distribuida | Redis 7 |
 | Caché en memoria | TTLCache (por worker) |
-| Persistencia | SQLite — backend y app móvil |
+| Persistencia | SQLite |
 | Autenticación | API Key + sesiones Bearer |
 | Rate limiting | SQLite sliding-window |
 | Tareas programadas | APScheduler |
-| Monitoreo | Dashboard HTML/JS propio con Basic Auth |
+| Monitoreo | Dashboard HTML/JS + Basic Auth |
 | Despliegue | Docker Compose + Nginx + Certbot |
-| App móvil | Flutter — Riverpod, media_kit, Drift/SQLite |
+
+</td>
+<td valign="top" width="50%">
+
+**App móvil**
+
+| Capa | Tecnología |
+|---|---|
+| Framework | Flutter (Android) |
+| Estado | Riverpod |
+| Reproductor | media_kit |
+| Persistencia local | Drift / SQLite |
+| Sincronización | User state API (Bearer) |
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## Arquitectura
+
+<div align="center">
 
 ```
 Cliente Flutter
@@ -77,6 +99,8 @@ Cliente Flutter
             ├── Redis cache (SWR + TTL dinámico)
             └── Fuente de datos (mock / real)
 ```
+
+</div>
 
 **Infraestructura destacada:**
 
@@ -96,6 +120,9 @@ Cliente Flutter
 
 ## Estructura del proyecto
 
+<details>
+<summary>Ver estructura completa</summary>
+
 ```
 streamhub-demo/
 ├── backend/
@@ -110,6 +137,8 @@ streamhub-demo/
 ├── deploy/               # Script de setup para VPS + systemd service
 └── docker-compose.yml
 ```
+
+</details>
 
 ---
 
@@ -180,6 +209,9 @@ DATA_PROVIDER=mock
 
 ## Endpoints principales
 
+<details>
+<summary>Ver tabla de endpoints</summary>
+
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | `GET` | `/health` | — | Estado del servicio y Redis |
@@ -198,6 +230,8 @@ DATA_PROVIDER=mock
 | `GET` | `/auth/me` | Bearer | Perfil del usuario autenticado |
 | `GET` | `/user/state` | Bearer | Descargar estado del usuario |
 | `POST` | `/user/state` | Bearer | Sincronizar estado del usuario |
+
+</details>
 
 ---
 
