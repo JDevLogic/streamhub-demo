@@ -44,11 +44,14 @@ class TestSQLiteRateLimiter:
         rl = SQLiteRateLimiter(rl_db, default_limit=100, window=60)
         assert rl._check("ip:nuevo", 100) is True
 
-    def test_ventana_deslizante_expira_entradas(self, rl_db):
+    def test_ventana_deslizante_expira_entradas(self, rl_db, monkeypatch):
+        fake_now = [1_000_000.0]
+        monkeypatch.setattr("time.time", lambda: fake_now[0])
+
         rl = SQLiteRateLimiter(rl_db, default_limit=1, window=1)
         assert rl._check("ip:1.2.3.4", 1) is True
         assert rl._check("ip:1.2.3.4", 1) is False   # dentro de la ventana
-        time.sleep(1.1)
+        fake_now[0] += 2.0                            # avanzar 2 s sin sleep
         assert rl._check("ip:1.2.3.4", 1) is True    # ventana expirada
 
     def test_limite_uno_bloquea_segunda_peticion(self, rl_db):

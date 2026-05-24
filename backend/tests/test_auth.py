@@ -1,7 +1,5 @@
 """Tests del sistema de autenticación (registro, login, sesión)."""
 
-import pytest
-
 API_KEY = "test-api-key"
 HEADERS = {"X-API-Key": API_KEY}
 

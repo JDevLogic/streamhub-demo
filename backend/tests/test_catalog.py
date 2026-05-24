@@ -1,7 +1,5 @@
 """Tests de los endpoints del catálogo (requieren X-API-Key)."""
 
-import pytest
-
 API_KEY = "test-api-key"
 HEADERS = {"X-API-Key": API_KEY}
 
