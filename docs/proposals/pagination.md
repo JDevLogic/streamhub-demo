@@ -2,7 +2,7 @@
 
 ## Problema
 
-Los endpoints `/animes`, `/ultimos-episodios` y `/en-emision` devuelven todos los resultados de una vez. En producción con datos reales esto se convierte en un problema de rendimiento y memoria.
+Los endpoints `/catalog`, `/latest-episodes` y `/on-air` devuelven todos los resultados de una vez. En producción con datos reales esto se convierte en un problema de rendimiento y memoria.
 
 ## Solución
 
@@ -11,10 +11,10 @@ Añadir paginación por offset a los endpoints de listado. Es el patrón más se
 ### Query params
 
 ```
-GET /animes?page=1&limit=20
-GET /ultimos-episodios?page=1&limit=20
-GET /en-emision?page=1&limit=20
-GET /buscar?q=naruto&page=1&limit=20
+GET /catalog?page=1&limit=20
+GET /latest-episodes?page=1&limit=20
+GET /on-air?page=1&limit=20
+GET /search?q=naruto&page=1&limit=20
 ```
 
 Valores por defecto: `page=1`, `limit=20`. Límite máximo: `limit=100`.
@@ -40,10 +40,10 @@ Envolver los datos en un envelope estándar:
 Añadir soporte de `offset` / `limit` en los métodos que devuelven listas:
 
 ```python
-def get_animes(self, page: int = 1, limit: int = 20) -> dict:
+def get_catalog(self, page: int = 1, limit: int = 20) -> dict:
     offset = (page - 1) * limit
-    items = self._all_animes[offset : offset + limit]
-    return {"data": items, "total": len(self._all_animes), ...}
+    items = self._all_items[offset : offset + limit]
+    return {"data": items, "total": len(self._all_items), ...}
 ```
 
 ### Routes
@@ -51,8 +51,8 @@ def get_animes(self, page: int = 1, limit: int = 20) -> dict:
 Añadir parámetros query con validación FastAPI:
 
 ```python
-@router.get("/animes")
-def get_animes(page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)):
+@router.get("/catalog")
+def get_catalog(page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)):
     ...
 ```
 

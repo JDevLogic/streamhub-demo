@@ -410,12 +410,12 @@ async function loadStats() {
 async function loadCache() {
   try {
     const d = await apiFetch('/cache');
-    document.getElementById('c-anime').textContent  = d.anime;
-    document.getElementById('c-ep').textContent     = d.episodios;
-    document.getElementById('c-serv').textContent   = d.servidores;
-    document.getElementById('ov-anime').textContent = d.anime;
-    document.getElementById('ov-ep').textContent    = d.episodios;
-    document.getElementById('ov-serv').textContent  = d.servidores;
+    document.getElementById('c-detail').textContent  = d.detail;
+    document.getElementById('c-ep').textContent     = d.episodes;
+    document.getElementById('c-serv').textContent   = d.sources;
+    document.getElementById('ov-detail').textContent = d.detail;
+    document.getElementById('ov-ep').textContent    = d.episodes;
+    document.getElementById('ov-serv').textContent  = d.sources;
     document.getElementById('ov-intro').textContent = d.intros;
   } catch(e) { console.error(e); }
 }
@@ -747,7 +747,7 @@ async function markNoIntro(url) {
 }
 
 async function clearCache(table) {
-  const names = {anime_cache:'Anime Detail', episodios_cache:'Episodios', servidores_cache:'Servidores'};
+  const names = {detail_cache:'Detail', episodes_cache:'Episodes', sources_cache:'Sources'};
   if (!confirm('Limpiar cache de ' + (names[table]||table) + '?')) return;
   try {
     await apiFetch('/cache/clear', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({table}) });

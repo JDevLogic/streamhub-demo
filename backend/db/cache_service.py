@@ -1,6 +1,6 @@
 """Cache service -- Redis persistence layer.
 
-Provides get/save helpers for anime detail, episode lists, and server links.
+Provides get/save helpers for content detail, episode lists, and server links.
 TTL validation and dynamic TTL calculation are centralised here.
 
 All function signatures are unchanged from the SQLite version.
@@ -8,9 +8,9 @@ If Redis is unavailable, every get returns None (triggering a scrape)
 and every save is silently skipped.
 
 TTL hierarchy (RAM > Redis > Scraping):
-  Anime detail : 6-24 h  (dynamic: shrinks as the anime gains new episodes)
-  Episodios    : 30min-1h (dynamic: same logic)
-  Servidores   : 1 h     (fixed -- the embed list is stable; the short-lived
+  Content detail : 6-24 h  (dynamic: shrinks as the anime gains new episodes)
+  Episodes    : 30min-1h (dynamic: same logic)
+  Sources   : 1 h     (fixed -- the embed list is stable; the short-lived
                           resolved MP4 is handled separately by /resolver)
 
 Stale-while-revalidate (SWR):
@@ -18,9 +18,9 @@ Stale-while-revalidate (SWR):
   but flagged so the caller can trigger a background refresh.
 
 Redis key schema:
-  anime:{url}        → JSON { "data": {...}, "change_count": N, "prev_ep_count": N }
-  episodios:{url}    → JSON { "data": [...], "change_count": N, "prev_count": N }
-  servidores:{url}   → JSON [...]
+  detail:{url}        → JSON { "data": {...}, "change_count": N, "prev_ep_count": N }
+  episodes:{url}    → JSON { "data": [...], "change_count": N, "prev_count": N }
+  sources:{url}   → JSON [...]
 """
 
 import json
@@ -32,9 +32,9 @@ from db import metrics
 _log = logging.getLogger(__name__)
 
 # -- TTL constants (seconds) --------------------------------------------
-ANIME_TTL      = 86_400   # 24 h base
-EPISODIOS_TTL  =  3_600   #  1 h base
-SERVIDORES_TTL =  3_600   #  1 h (fixed) -- embed list is stable; only the
+DETAIL_TTL      = 86_400   # 24 h base
+EPISODES_TTL  =  3_600   #  1 h base
+SOURCES_TTL =  3_600   #  1 h (fixed) -- embed list is stable; only the
                           #  resolved MP4 expires fast, and that's handled
                           #  by /resolver (which isn't cached).
 
@@ -132,17 +132,17 @@ def _save_tracked(
         _log.debug("Redis %s failed: %s", op_name, exc)
 
 
-# -- Anime detail -------------------------------------------------------
+# -- Content detail -------------------------------------------------------
 
-def get_anime_from_cache(url: str) -> dict | None:
-    """Return cached anime detail or None if missing / expired."""
+def get_detail_from_cache(url: str) -> dict | None:
+    """Return cached content detail or None if missing / expired."""
     raw = _redis_get_raw(f"detail:{url}", "detail", log_url=url)
     if raw is None:
         return None
     return json.loads(raw)["data"]
 
 
-def get_anime_from_cache_swr(url: str) -> tuple[dict | None, bool]:
+def get_detail_from_cache_swr(url: str) -> tuple[dict | None, bool]:
     """Return (data, is_stale) for stale-while-revalidate.
 
     is_stale=True when data is valid but past STALE_FACTOR of its TTL.
@@ -164,7 +164,7 @@ def get_anime_from_cache_swr(url: str) -> tuple[dict | None, bool]:
         return None, False
 
     entry = json.loads(raw)
-    ttl_effective = get_dynamic_ttl(ANIME_TTL, entry.get("change_count", 0))
+    ttl_effective = get_dynamic_ttl(DETAIL_TTL, entry.get("change_count", 0))
     ttl_remaining = _rc.redis.ttl(key)
 
     # ttl_remaining can be -2 (key gone) or -1 (no expiry)
@@ -181,10 +181,10 @@ def get_anime_from_cache_swr(url: str) -> tuple[dict | None, bool]:
     return entry["data"], is_stale
 
 
-def save_anime_to_cache(url: str, data: dict) -> None:
+def save_detail_to_cache(url: str, data: dict) -> None:
     _save_tracked(
         key=f"detail:{url}",
-        base_ttl=ANIME_TTL,
+        base_ttl=DETAIL_TTL,
         data=data,
         count_now=int(data.get("episodios_count") or 0),
         prev_key="prev_ep_count",
@@ -192,83 +192,83 @@ def save_anime_to_cache(url: str, data: dict) -> None:
     )
 
 
-# -- Episodios ----------------------------------------------------------
+# -- Episodes ----------------------------------------------------------
 
-def get_episodios_from_cache(anime_url: str) -> list | None:
+def get_episodes_from_cache(content_url: str) -> list | None:
     """Return cached episode list or None if missing / expired."""
-    raw = _redis_get_raw(f"episodes:{anime_url}", "episodios", log_url=anime_url)
+    raw = _redis_get_raw(f"episodes:{content_url}", "episodes", log_url=content_url)
     if raw is None:
         return None
     return json.loads(raw)["data"]
 
 
-def get_episodios_from_cache_swr(anime_url: str) -> tuple[list | None, bool]:
+def get_episodes_from_cache_swr(content_url: str) -> tuple[list | None, bool]:
     """Return (data, is_stale) for stale-while-revalidate.
 
     is_stale=True when data is valid but past STALE_FACTOR of its TTL.
     The caller should serve data immediately and trigger a background refresh.
     """
-    key = f"episodes:{anime_url}"
+    key = f"episodes:{content_url}"
     if _rc.redis is None:
-        metrics.record_miss("episodios")
+        metrics.record_miss("episodes")
         return None, False
     try:
         raw = _rc.redis.get(key)
     except Exception:
-        metrics.record_miss("episodios")
+        metrics.record_miss("episodes")
         return None, False
 
     if not raw or raw == "null":
-        _log.info("MISS %-11s %s", "episodios", anime_url.split('/')[-1])
-        metrics.record_miss("episodios")
+        _log.info("MISS %-11s %s", "episodes", content_url.split('/')[-1])
+        metrics.record_miss("episodes")
         return None, False
 
     entry = json.loads(raw)
-    ttl_effective = get_dynamic_ttl(EPISODIOS_TTL, entry.get("change_count", 0))
+    ttl_effective = get_dynamic_ttl(EPISODES_TTL, entry.get("change_count", 0))
     ttl_remaining = _rc.redis.ttl(key)
 
     if ttl_remaining is None or ttl_remaining < 0:
-        metrics.record_miss("episodios")
+        metrics.record_miss("episodes")
         return None, False
 
     elapsed = ttl_effective - ttl_remaining
     is_stale = elapsed > (ttl_effective * STALE_FACTOR)
     if is_stale:
-        _log.debug("stale episodios     url=%s", anime_url)
-    _log.info("HIT  %-11s %s", "episodios", anime_url.split('/')[-1])
-    metrics.record_hit("episodios")
+        _log.debug("stale episodes     url=%s", content_url)
+    _log.info("HIT  %-11s %s", "episodes", content_url.split('/')[-1])
+    metrics.record_hit("episodes")
     return entry["data"], is_stale
 
 
-def save_episodios_to_cache(anime_url: str, data: list) -> None:
+def save_episodes_to_cache(content_url: str, data: list) -> None:
     _save_tracked(
-        key=f"episodes:{anime_url}",
-        base_ttl=EPISODIOS_TTL,
+        key=f"episodes:{content_url}",
+        base_ttl=EPISODES_TTL,
         data=data,
         count_now=len(data),
         prev_key="prev_count",
-        op_name="save_episodios",
+        op_name="save_episodes",
     )
 
 
-# -- Servidores ---------------------------------------------------------
+# -- Sources ---------------------------------------------------------
 
-def get_servidores_from_cache(episodio_url: str) -> list | None:
+def get_sources_from_cache(episode_url: str) -> list | None:
     """Return cached server list or None if missing / expired."""
-    raw = _redis_get_raw(f"sources:{episodio_url}", "servidores")
+    raw = _redis_get_raw(f"sources:{episode_url}", "sources")
     if raw is None:
         return None
     return json.loads(raw)
 
 
-def save_servidores_to_cache(episodio_url: str, data: list) -> None:
+def save_sources_to_cache(episode_url: str, data: list) -> None:
     if _rc.redis is None:
         return
     try:
         _rc.redis.setex(
-            f"sources:{episodio_url}",
-            SERVIDORES_TTL,
+            f"sources:{episode_url}",
+            SOURCES_TTL,
             json.dumps(data, ensure_ascii=False),
         )
     except Exception as exc:
-        _log.debug("Redis save_servidores failed: %s", exc)
+        _log.debug("Redis save_sources failed: %s", exc)

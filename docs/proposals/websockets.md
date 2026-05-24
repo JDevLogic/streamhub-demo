@@ -28,7 +28,7 @@ ws://localhost:5050/ws/activity?api_key=...
 {
   "timestamp": "2024-01-15T10:30:00Z",
   "method": "GET",
-  "path": "/animes",
+  "path": "/catalog",
   "status": 200,
   "duration_ms": 45.2,
   "ip": "192.168.1.1"
