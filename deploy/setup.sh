@@ -31,4 +31,9 @@ ufw allow OpenSSH
 ufw allow 80
 ufw --force enable
 
-echo "✓ StreamHub desplegado en http://YOUR_VPS_IP"
+echo "✓ StreamHub desplegado."
+echo ""
+echo "Pasos siguientes:"
+echo "  1. Copia y edita el fichero de entorno:  cp $APP_DIR/backend/.env.example $APP_DIR/backend/.env"
+echo "  2. Reinicia el servicio tras configurar:  systemctl restart streamhub"
+echo "  3. Comprueba el estado:                   systemctl status streamhub"
