@@ -1,6 +1,6 @@
 ﻿# Disclaimer
 
-AniStream Demo es un proyecto educativo full-stack creado para practicar arquitectura backend, APIs REST, caché, autenticación, telemetría, despliegue con Docker y desarrollo móvil con Flutter.
+StreamHub Demo es un proyecto educativo full-stack creado para practicar arquitectura backend, APIs REST, caché, autenticación, telemetría, despliegue con Docker y desarrollo móvil con Flutter.
 
 Esta versión pública utiliza datos de demostración y un vídeo público de prueba.
 

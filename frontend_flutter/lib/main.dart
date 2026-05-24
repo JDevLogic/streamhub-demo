@@ -60,7 +60,7 @@ class AnimeStreamingApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'AniStream',
+      title: 'StreamHub',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: baseBg,
         appBarTheme: AppBarTheme(
@@ -168,7 +168,7 @@ class _SplashScreen extends StatelessWidget {
               shaderCallback: (bounds) =>
                   VoidTheme.gradientPrimary.createShader(bounds),
               child: Text(
-                'AniStream',
+                'StreamHub',
                 style: GoogleFonts.sora(
                   fontSize: 40,
                   fontWeight: FontWeight.w800,

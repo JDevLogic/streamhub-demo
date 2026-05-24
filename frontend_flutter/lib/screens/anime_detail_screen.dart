@@ -25,12 +25,9 @@ const _kImageHeaders = {
 String _normalizeAnimeUrl(String raw) {
   var url = raw.trim();
   if (url.isEmpty) return '';
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
   if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('demo://')) {
     url = 'demo://anime/';
   }
-
-  // Strip trailing slash so URLs with and without it map to the same entry.
   return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
 }
 

@@ -172,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content:
-                        const Text('Cuenta creada. Bienvenido a AniStream.'),
+                        const Text('Cuenta creada. Bienvenido a StreamHub.'),
                     backgroundColor: Colors.green.shade700,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
@@ -368,7 +368,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     shaderCallback: (bounds) =>
                         VoidTheme.gradientPrimary.createShader(bounds),
                     child: Text(
-                      'ANISTREAM',
+                      'STREAMHUB',
                       style: GoogleFonts.sora(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,

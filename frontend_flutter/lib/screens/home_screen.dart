@@ -487,7 +487,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 shaderCallback: (bounds) =>
                     VoidTheme.gradientPrimary.createShader(bounds),
                 child: Text(
-                  'ANISTREAM',
+                  'STREAMHUB',
                   style: GoogleFonts.sora(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,

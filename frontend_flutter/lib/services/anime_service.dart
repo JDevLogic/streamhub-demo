@@ -208,11 +208,11 @@ class AnimeService {
     if (cached != null) return cached;
 
     try {
-      final uri = Uri.parse('/resolver').replace(
+      final uri = Uri.parse('$baseUrl/resolver').replace(
         queryParameters: {'url': embedUrl},
       );
 
-      final response = await _client.get(uri, headers: _headers);
+      final response = await _get(uri);
 
       if (response.statusCode != 200) {
         return [];
@@ -236,14 +236,6 @@ class AnimeService {
 
   static const _kServerPriority = [
     'demo',
-  ];
-
-
-
-
-
-
-
   ];
 
   static int _serverPriorityOf(Map<String, dynamic> server) {

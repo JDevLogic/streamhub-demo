@@ -1,4 +1,4 @@
-# AniStream Demo
+# StreamHub Demo
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat&logo=fastapi&logoColor=white)
@@ -7,24 +7,23 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=flat)
 
-> Demo educativa full-stack orientada a portfolio: arquitectura backend, desarrollo móvil, caché, autenticación, telemetría y despliegue con Docker.
-
-AniStream Demo es la versión pública de un proyecto personal de aprendizaje full-stack. Utiliza datos de demostración y un vídeo público de prueba para mostrar la arquitectura del sistema sin enlazar, alojar, distribuir ni monetizar contenido protegido por derechos de autor.
-
-El objetivo es demostrar cómo se diseña e integra un sistema completo: API REST con FastAPI, caché en dos capas (Redis + memoria), autenticación con sesiones, sincronización de estado de usuario, telemetría, rate limiting, despliegue con Docker y un cliente móvil con Flutter.
+> Plataforma de streaming full-stack construida como portfolio técnico. Combina una API REST con FastAPI, caché en dos capas con Redis, autenticación completa, dashboard de telemetría propio y un cliente móvil nativo en Flutter.
 
 ---
 
-## Highlights técnicos
+## ¿Qué demuestra este proyecto?
 
-- **Arquitectura basada en proveedores** — capa de abstracción entre rutas y fuente de datos; el proveedor mock permite ejecutar el sistema completo sin dependencias externas.
-- **Caché en dos capas** — Redis para datos compartidos entre workers + `TTLCache` en memoria para reducir round-trips.
-- **Rate limiting con SQLite** — sliding-window implementado sobre SQLite, sin dependencias de Redis para esta función crítica.
-- **Sincronización de usuario** — el estado de la app (lista, progreso, historial) se serializa y sincroniza entre dispositivos a través de la API.
-- **Dashboard de telemetría propio** — panel protegido con Basic Auth que registra actividad, métricas de latencia, health de fuentes y logs en tiempo real.
-- **Reproductor nativo en Flutter** — integración con `media_kit`, progreso persistido localmente con SQLite/Drift y continuación automática.
-- **Autenticación completa** — registro, login, sesiones con tokens, expiración y logout desde el cliente.
-- **Despliegue listo** — Docker Compose con backend, Redis y Nginx; configuración de Certbot para HTTPS incluida.
+StreamHub es la versión pública de un sistema de streaming personal diseñado para practicar e integrar múltiples áreas del desarrollo de software en un mismo proyecto cohesionado:
+
+| Área | Patrones y tecnologías |
+|---|---|
+| API REST | FastAPI, Uvicorn, routing modular, validación de parámetros |
+| Caché | Redis con TTL dinámico + Stale-While-Revalidate (SWR) |
+| Seguridad | API Key, Bearer tokens, rate limiting sliding-window |
+| Infraestructura | Docker Compose, Nginx reverse proxy, systemd, HTTPS/Certbot |
+| App móvil | Flutter, Riverpod, reproductor nativo, persistencia offline |
+| Observabilidad | Dashboard propio con métricas, actividad y health checks |
+| Diseño | Patrón Provider para desacoplar rutas de la fuente de datos |
 
 ---
 
@@ -33,66 +32,60 @@ El objetivo es demostrar cómo se diseña e integra un sistema completo: API RES
 | Capa | Tecnología |
 |---|---|
 | API | FastAPI + Uvicorn |
-| Caché | Redis + TTLCache en memoria |
-| Persistencia | SQLite |
+| Caché distribuida | Redis 7 |
+| Caché en memoria | TTLCache (por worker) |
+| Persistencia | SQLite — backend y app móvil |
 | Autenticación | API Key + sesiones Bearer |
 | Rate limiting | SQLite sliding-window |
 | Tareas programadas | APScheduler |
-| Monitoreo | Dashboard propio + telemetría |
+| Monitoreo | Dashboard HTML/JS propio con Basic Auth |
 | Despliegue | Docker Compose + Nginx + Certbot |
-| App móvil | Flutter (Riverpod, media_kit, Drift) |
+| App móvil | Flutter — Riverpod, media_kit, Drift/SQLite |
+
+---
+
+## Arquitectura
+
+```
+Cliente Flutter
+      │  X-API-Key / Bearer
+      ▼
+   Nginx (reverse proxy + TLS)
+      │
+      ▼
+   FastAPI
+      ├── Middleware: rate limiter (SQLite sliding-window) + timing
+      ├── Middleware: telemetría → Dashboard
+      ├── Auth: API Key dependency / Bearer token
+      └── Provider layer
+            ├── Redis cache (SWR + TTL dinámico)
+            └── Fuente de datos (mock / real)
+```
+
+**Patrones de caché destacados:**
+
+- **Stale-While-Revalidate (SWR)** — los datos se sirven inmediatamente desde caché y se revalidan en background cuando superan el 75% de su TTL.
+- **TTL dinámico** — el TTL se reduce automáticamente para entradas que cambian con frecuencia, aumentando la frescura sin coste adicional.
+- **Caché en dos capas** — Redis comparte datos entre workers; TTLCache en memoria evita round-trips a Redis para los accesos más frecuentes.
+- **Offline-first en Flutter** — las listas principales se persisten localmente con Drift; la app es funcional sin conexión y sincroniza al recuperarla.
 
 ---
 
 ## Estructura del proyecto
 
 ```
-anistream-demo/
+streamhub-demo/
 ├── backend/
-│   ├── providers/        # Capa de abstracción de datos
-│   ├── routes/           # Endpoints de la API
-│   ├── db/               # SQLite, Redis, métricas y telemetría
-│   ├── dashboard/        # Panel de monitoreo
-│   └── utils/            # Logs, actividad y helpers
-├── frontend_flutter/     # Cliente móvil Android
+│   ├── providers/        # Abstracción de fuente de datos (mock / real)
+│   ├── routes/           # Endpoints REST organizados por dominio
+│   ├── db/               # Redis, SQLite, métricas y caché service
+│   ├── dashboard/        # Panel de telemetría (HTML + JS + Basic Auth)
+│   └── utils/            # Buffer de logs y registro de actividad
+├── frontend_flutter/     # Cliente Android (Flutter)
 ├── nginx/                # Configuración reverse proxy + HTTPS
-├── deploy/               # Systemd service y scripts de despliegue
+├── deploy/               # Script de setup para VPS + systemd service
 └── docker-compose.yml
 ```
-
----
-
-## Endpoints principales
-
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| `GET` | `/health` | — | Estado del backend |
-| `GET` | `/metrics` | — | Métricas de latencia |
-| `GET` | `/dashboard` | Basic Auth | Panel de monitoreo |
-| `GET` | `/animes` | API Key | Catálogo demo |
-| `GET` | `/ultimos-episodios` | API Key | Episodios recientes |
-| `GET` | `/en-emision` | API Key | En emisión |
-| `GET` | `/buscar?q=` | API Key | Búsqueda |
-| `GET` | `/anime-detalle?url=` | API Key | Detalle de anime |
-| `GET` | `/episodios?url=` | API Key | Lista de episodios |
-| `GET` | `/servidores?url=` | API Key | Servidores de vídeo |
-| `GET` | `/resolver?url=` | API Key | URL de reproducción |
-| `POST` | `/auth/register` | API Key | Registro de usuario |
-| `POST` | `/auth/login` | API Key | Inicio de sesión |
-| `GET` | `/auth/me` | Bearer | Usuario actual |
-| `GET` | `/user/state` | Bearer | Descargar estado |
-| `POST` | `/user/state` | Bearer | Subir estado |
-
----
-
-## Modo demo
-
-La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos devueltos por la API son ficticios. El endpoint `/resolver` apunta a un vídeo público de Google usado únicamente para validar el flujo completo:
-
-- reproducción nativa en el player
-- progreso y "continuar viendo"
-- sincronización de estado entre dispositivos
-- telemetría y dashboard de monitoreo
 
 ---
 
@@ -115,7 +108,7 @@ curl http://localhost:5050/health
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
@@ -124,7 +117,7 @@ cp .env.example .env
 python app.py
 ```
 
-Backend disponible en `http://localhost:5050`.
+Backend disponible en `http://localhost:5050`. El dashboard de monitoreo en `http://localhost:5050/dashboard`.
 
 ### App Flutter
 
@@ -137,7 +130,7 @@ flutter run \
   --dart-define=API_BASE_URL=http://10.0.2.2:5050 \
   --dart-define=API_KEY=tu_api_key
 
-# Dispositivo físico (misma red local)
+# Dispositivo físico en la misma red
 flutter run \
   --dart-define=API_BASE_URL=http://192.168.1.X:5050 \
   --dart-define=API_KEY=tu_api_key
@@ -158,6 +151,40 @@ DASHBOARD_PASS=reemplaza_con_contraseña_larga
 ALLOWED_ORIGINS=http://localhost:3000
 DATA_PROVIDER=mock
 ```
+
+---
+
+## Endpoints principales
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| `GET` | `/health` | — | Estado del servicio y Redis |
+| `GET` | `/metrics` | — | Métricas de latencia por ruta |
+| `GET` | `/dashboard` | Basic Auth | Panel de monitoreo |
+| `GET` | `/animes` | API Key | Catálogo de contenido |
+| `GET` | `/ultimos-episodios` | API Key | Episodios recientes |
+| `GET` | `/en-emision` | API Key | Contenido en emisión |
+| `GET` | `/buscar?q=` | API Key | Búsqueda en el catálogo |
+| `GET` | `/anime-detalle?url=` | API Key | Detalle de título |
+| `GET` | `/episodios?url=` | API Key | Lista de episodios |
+| `GET` | `/servidores?url=` | API Key | Fuentes de vídeo disponibles |
+| `GET` | `/resolver?url=` | API Key | Resolución a URL de reproducción |
+| `POST` | `/auth/register` | API Key | Registro de usuario |
+| `POST` | `/auth/login` | API Key | Inicio de sesión |
+| `GET` | `/auth/me` | Bearer | Perfil del usuario autenticado |
+| `GET` | `/user/state` | Bearer | Descargar estado del usuario |
+| `POST` | `/user/state` | Bearer | Sincronizar estado del usuario |
+
+---
+
+## Modo demo
+
+La versión pública funciona con `DATA_PROVIDER=mock`. Todos los datos son ficticios (títulos inventados, imágenes de dominio público). El endpoint `/resolver` apunta a un vídeo de Google con licencia Creative Commons, usado únicamente para validar el flujo completo:
+
+- Reproducción nativa en el player
+- Progreso y "continuar viendo"
+- Sincronización de estado entre sesiones
+- Registro de telemetría y dashboard de monitoreo
 
 ---
 

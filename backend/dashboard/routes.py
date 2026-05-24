@@ -1,4 +1,4 @@
-﻿"""Admin dashboard â€” visual control centre for the AniStream backend.
+﻿“””Admin dashboard — visual control centre for the StreamHub backend.
 
 Routes
 ------
@@ -66,7 +66,7 @@ def _require_auth(credentials: HTTPBasicCredentials = Depends(_security)):
         raise HTTPException(
             status_code=401,
             detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic realm=AniStream Dashboard"},
+            headers={"WWW-Authenticate": "Basic realm=StreamHub Dashboard"},
         )
     return credentials.username
 

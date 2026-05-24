@@ -68,7 +68,7 @@ class SQLiteRateLimiter:
 
 DEMO_ALLOWED_DOMAINS: set[str] = {
     "commondatastorage.googleapis.com",
-    "s4.anilist.co",
+    "picsum.photos",
 }
 
 SCRAPER_ALLOWED_DOMAINS: set[str] = DEMO_ALLOWED_DOMAINS

@@ -1,4 +1,5 @@
 ﻿import asyncio
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
@@ -89,7 +90,6 @@ async def _rate_limit_and_timing(request: Request, call_next):
             elapsed_ms=elapsed,
             client_ip=remote_addr,
         )
-        import logging
         req_logger = logging.getLogger("api.request")
         msg = f"{request.method} {path} HTTP {response.status_code} ({elapsed:.1f}ms) IP: {remote_addr}"
         if response.status_code >= 500:
