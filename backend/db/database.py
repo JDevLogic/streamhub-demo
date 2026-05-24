@@ -80,7 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_seh_source_day
 
 
 def _migrate(conn: sqlite3.Connection) -> None:
-    """Apply schema migrations. Idempotent — safe to run every startup."""
+    """Apply schema migrations. Idempotent -- safe to run every startup."""
     # intro_skips: migrate old schema (anime_url PK) to new (episodio_url PK)
     intro_cols = {row[1] for row in conn.execute("PRAGMA table_info(intro_skips)")}
     if "anime_url" in intro_cols:

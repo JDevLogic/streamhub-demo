@@ -37,12 +37,12 @@ def connect() -> None:
         redis = r
         _log.info("Redis connected: %s", REDIS_URL)
     except Exception as exc:
-        _log.warning("Redis unavailable (%s) — cache disabled, scraping only", exc)
+        _log.warning("Redis unavailable (%s) -- cache disabled, scraping only", exc)
         redis = None
 
 
 def is_available() -> bool:
-    """Quick health check — returns False if Redis is down."""
+    """Quick health check -- returns False if Redis is down."""
     if redis is None:
         return False
     try:

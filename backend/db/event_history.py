@@ -1,4 +1,4 @@
-"""Durable hourly rollup of source outcomes — Phase 4 of the telemetry plan.
+"""Durable hourly rollup of source outcomes -- Phase 4 of the telemetry plan.
 
 Answers objective #3: *when* do failures happen (e.g. a source that
 degrades at night). The live traffic-light view lives in
@@ -13,8 +13,8 @@ Design notes
 * Writes are **best-effort**: a telemetry failure must never break a
   scrape, so :func:`record` swallows every exception.
 * Writes run inline (one tiny UPSERT) rather than via a scheduler flush.
-  At this app's volume the cost is negligible, and — unlike a per-process
-  in-memory accumulator flushed by the single scheduler-lock owner — every
+  At this app's volume the cost is negligible, and -- unlike a per-process
+  in-memory accumulator flushed by the single scheduler-lock owner -- every
   worker process persists its own events with no data loss.
 * ``day``/``hour`` are **server-local** time; the dashboard shows them
   as-is. A timezone offset can be layered on later if needed.

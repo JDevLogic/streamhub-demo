@@ -4,7 +4,7 @@ Split out of ``dashboard/routes.py`` (see ``docs/refactor-dashboard-split.md``).
 The static shell, CSS and JS live as real files under ``./assets`` so they
 get proper tooling (lint/format/highlight); they are read once at import
 and inlined into a single HTML document. Serving model is unchanged: one
-authenticated ``HTMLResponse`` — no extra routes, no StaticFiles.
+authenticated ``HTMLResponse`` -- no extra routes, no StaticFiles.
 
 Assembled with ``str.replace`` of explicit tokens, **never** f-string or
 ``str.format``: the CSS/JS contain literal ``{`` ``}``. Data still flows

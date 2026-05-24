@@ -5,7 +5,7 @@ from typing import Any
 
 DEMO_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
-# Picsum Photos — imágenes libres (CC), seed fijo = imagen consistente entre reinicios.
+# Picsum Photos -- imágenes libres (CC), seed fijo = imagen consistente entre reinicios.
 # Formato: https://picsum.photos/seed/{seed}/{width}/{height}
 _IMG = {
     "demo-adventure":   "https://picsum.photos/seed/adventure/400/560",
