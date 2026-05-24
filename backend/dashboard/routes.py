@@ -1450,7 +1450,7 @@ async def api_debug_servers(url: str = "", _user=Depends(_require_auth)):
 
     t0 = time.perf_counter()
 
-    servers = provider.get_servidores(url.strip())
+    servers = provider.get_sources(url.strip())
 
     elapsed = round((time.perf_counter() - t0) * 1000, 1)
 

@@ -103,7 +103,7 @@ def test_episodios_sin_url_devuelve_400(client):
 
 # -- Servidores y resolver --------------------------------------------------
 
-def test_servidores(client):
+def test_sources(client):
     r = client.get("/sources?url=demo://episode/test", headers=HEADERS)
     assert r.status_code == 200
     data = r.json()

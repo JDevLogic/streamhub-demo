@@ -71,7 +71,7 @@ def _redis_get_raw(key: str, kind: str, *, log_url: str | None = None) -> str | 
     """Fetch a raw Redis value, recording hit/miss metrics and optional logs.
 
     ``log_url`` is only used to emit human-readable MISS/HIT logs for the
-    detail/episodios namespaces; ``servidores`` skips logging by passing None.
+    detail/episodes namespaces; ``sources`` skips logging by passing None.
     """
     if _rc.redis is None:
         metrics.record_miss(kind)
