@@ -204,29 +204,36 @@ DATA_PROVIDER=mock
 
 ## Endpoints principales
 
-<details>
-<summary>Ver tabla de endpoints</summary>
+**Sin autenticación**
 
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| `GET` | `/health` | — | Estado del servicio y Redis |
-| `GET` | `/metrics` | — | Métricas de latencia por ruta |
-| `GET` | `/dashboard` | Basic Auth | Panel de monitoreo |
-| `GET` | `/animes` | API Key | Catálogo de contenido |
-| `GET` | `/ultimos-episodios` | API Key | Episodios recientes |
-| `GET` | `/en-emision` | API Key | Contenido en emisión |
-| `GET` | `/buscar?q=` | API Key | Búsqueda en el catálogo |
-| `GET` | `/anime-detalle?url=` | API Key | Detalle de título |
-| `GET` | `/episodios?url=` | API Key | Lista de episodios |
-| `GET` | `/servidores?url=` | API Key | Fuentes de vídeo disponibles |
-| `GET` | `/resolver?url=` | API Key | Resolución a URL de reproducción |
-| `POST` | `/auth/register` | API Key | Registro de usuario |
-| `POST` | `/auth/login` | API Key | Inicio de sesión |
-| `GET` | `/auth/me` | Bearer | Perfil del usuario autenticado |
-| `GET` | `/user/state` | Bearer | Descargar estado del usuario |
-| `POST` | `/user/state` | Bearer | Sincronizar estado del usuario |
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/health` | Estado del servicio y Redis |
+| `GET` | `/metrics` | Métricas de latencia por ruta |
+| `GET` | `/dashboard` | Panel de monitoreo (Basic Auth) |
 
-</details>
+**API Key** — header `X-API-Key`
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/animes` | Catálogo de contenido |
+| `GET` | `/ultimos-episodios` | Episodios recientes |
+| `GET` | `/en-emision` | Contenido en emisión |
+| `GET` | `/buscar?q=` | Búsqueda en el catálogo |
+| `GET` | `/anime-detalle?url=` | Detalle de título |
+| `GET` | `/episodios?url=` | Lista de episodios |
+| `GET` | `/servidores?url=` | Fuentes de vídeo disponibles |
+| `GET` | `/resolver?url=` | Resolución a URL de reproducción |
+| `POST` | `/auth/register` | Registro de usuario |
+| `POST` | `/auth/login` | Inicio de sesión |
+
+**Bearer token** — header `Authorization: Bearer <token>`
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/auth/me` | Perfil del usuario autenticado |
+| `GET` | `/user/state` | Descargar estado del usuario |
+| `POST` | `/user/state` | Sincronizar estado del usuario |
 
 ---
 
