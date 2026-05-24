@@ -16,10 +16,14 @@
 
 ---
 
-| Vista general | Actividad | Métricas |
-|:---:|:---:|:---:|
-| ![Vista general](docs/screenshots/dashboard-overview.png) | ![Actividad](docs/screenshots/dashboard-activity.png) | ![Métricas](docs/screenshots/dashboard-metrics.png) |
-| Métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento | Registro de cada petición con método, ruta, status, tiempo e IP | Requests totales, tiempo promedio y percentil 95 por ruta |
+**Vista general** — métricas del servidor en tiempo real: CPU, RAM, uptime y rendimiento.
+![Vista general](docs/screenshots/dashboard-overview.png)
+
+**Actividad** — registro de cada petición con método, ruta, status, tiempo de respuesta e IP.
+![Actividad](docs/screenshots/dashboard-activity.png)
+
+**Métricas por endpoint** — requests totales, tiempo promedio y percentil 95 por ruta.
+![Métricas](docs/screenshots/dashboard-metrics.png)
 
 </div>
 
@@ -82,25 +86,20 @@ StreamHub es la versión pública de un sistema de streaming personal diseñado 
 
 ## Arquitectura
 
-<div align="center">
-
+```mermaid
+graph TD
+    A["Cliente Flutter"] -->|"X-API-Key / Bearer"| B["Nginx · reverse proxy + TLS"]
+    B --> C["FastAPI"]
+    C --> D["Rate limiter · Timing"]
+    C --> E["Telemetría"]
+    C --> F["Auth — API Key / Bearer"]
+    D --> G["Provider layer"]
+    E --> G
+    F --> G
+    G --> H[("Redis · SWR · TTL dinámico")]
+    G --> I["Fuente de datos · mock / real"]
+    E -.-> J["Dashboard · Basic Auth"]
 ```
-Cliente Flutter
-      │  X-API-Key / Bearer
-      ▼
-   Nginx (reverse proxy + TLS)
-      │
-      ▼
-   FastAPI
-      ├── Middleware: rate limiter (SQLite sliding-window) + timing
-      ├── Middleware: telemetría → Dashboard
-      ├── Auth: API Key dependency / Bearer token
-      └── Provider layer
-            ├── Redis cache (SWR + TTL dinámico)
-            └── Fuente de datos (mock / real)
-```
-
-</div>
 
 **Infraestructura destacada:**
 
