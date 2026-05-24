@@ -3,10 +3,10 @@ Description=StreamHub Backend
 After=network.target
 
 [Service]
-User=root
-WorkingDirectory=/root/streamhub/backend
-EnvironmentFile=/root/streamhub/backend/.env
-ExecStart=/root/streamhub/backend/venv/bin/uvicorn app:app --host 127.0.0.1 --port 5050 --workers 2
+User=streamhub
+WorkingDirectory=/opt/streamhub/backend
+EnvironmentFile=/opt/streamhub/backend/.env
+ExecStart=/opt/streamhub/backend/venv/bin/uvicorn app:app --host 127.0.0.1 --port 5050 --workers 2
 Restart=always
 RestartSec=3
 

@@ -3,30 +3,34 @@
 
 set -e
 
-APP_DIR=/root/streamhub
+APP_DIR=/opt/streamhub
 
 # 1. System deps
 apt update && apt install -y python3 python3-pip python3-venv nginx
 
-# 2. Virtualenv + packages
+# 2. Usuario de sistema sin privilegios
+useradd --system --no-create-home --shell /usr/sbin/nologin streamhub || true
+chown -R streamhub:streamhub $APP_DIR
+
+# 3. Virtualenv + packages
 cd $APP_DIR/backend
 python3 -m venv venv
-source venv/bin/activate
+chown -R streamhub:streamhub $APP_DIR/backend/venv
 pip install -r requirements.txt
 
-# 3. Systemd service
+# 4. Systemd service
 cp $APP_DIR/deploy/streamhub.service /etc/systemd/system/streamhub.service
 systemctl daemon-reload
 systemctl enable streamhub
 systemctl start streamhub
 
-# 4. Nginx
+# 5. Nginx
 cp $APP_DIR/deploy/nginx.conf /etc/nginx/sites-available/streamhub
 ln -sf /etc/nginx/sites-available/streamhub /etc/nginx/sites-enabled/streamhub
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl restart nginx
 
-# 5. Firewall
+# 6. Firewall
 ufw allow OpenSSH
 ufw allow 80
 ufw --force enable
