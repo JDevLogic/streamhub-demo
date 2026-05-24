@@ -78,6 +78,12 @@ Cliente Flutter
             └── Fuente de datos (mock / real)
 ```
 
+**Infraestructura destacada:**
+
+- **Nginx como TLS terminator** — FastAPI nunca toca SSL; Nginx reenvía `X-Real-IP` para que el rate limiter vea la IP del cliente, no la del proxy.
+- **SQLite en modo WAL** — permite lecturas concurrentes sin bloquear escrituras, necesario con múltiples workers de Uvicorn.
+- **SQLite con múltiples roles** — rate limiting (sliding-window), autenticación (usuarios + sesiones Bearer), sincronización de estado del usuario y telemetría durable.
+
 **Patrones de caché destacados:**
 
 - **Stale-While-Revalidate (SWR)** — los datos se sirven inmediatamente desde caché y se revalidan en background cuando superan el 75% de su TTL.
